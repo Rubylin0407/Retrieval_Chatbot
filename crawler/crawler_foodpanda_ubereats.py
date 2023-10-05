@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import sys
 import os
-from database import db_connection, insert_into_mongodb, close_mongodb_connection
+from crawler.database import db_connection, insert_into_mongodb, close_mongodb_connection
 
 load_dotenv()
 sys.setrecursionlimit(1000000)
