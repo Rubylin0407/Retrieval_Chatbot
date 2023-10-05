@@ -3,11 +3,17 @@ import opencc
 import openai
 import mdtex2html
 import gradio as gr
+from dotenv import load_dotenv
 from utils import (
     read_and_process_knowledge_to_langchain_docs,
     initial_langchain_embeddings,
     initial_or_read_langchain_database_faiss,
 )
+
+load_dotenv()
+
+# Use the absolute path to the .env file
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 
 def postprocess(self, y):
     if y is None:
@@ -86,11 +92,11 @@ def reset_state():
     return [], [], None, []
 
 # os.environ["OPENAI_API_KEY"] = open("openai_api.txt", "r").readline()
-openai.api_key_path = "openai_api.txt"
+openai.api_key = os.getenv("OPENAI_API_KEY")
 model_kwargs = {'device': 'cpu'}
-docs = read_and_process_knowledge_to_langchain_docs("data/knowledge.txt", separator = '\n', chunk_size=128)
+docs = read_and_process_knowledge_to_langchain_docs("data/knowledge.txt", separator = '\n', chunk_size=1028)
 embedding_function = initial_langchain_embeddings("moka-ai/m3e-base", model_kwargs, False)
-vectordb = initial_or_read_langchain_database_faiss(docs, embedding_function, "vectordb/vectordbPrivate", False)
+vectordb = initial_or_read_langchain_database_faiss(docs, embedding_function, "vectordb/vectordbPrivate", True) # renew vector database
 s2t = opencc.OpenCC('s2t.json')
 
 with gr.Blocks() as demo:
