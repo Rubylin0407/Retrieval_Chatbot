@@ -35,46 +35,12 @@ def postprocess(self, y):
         )
     return y
 
-def parse_text(text):
-    """copy from https://github.com/GaiZhenbiao/ChuanhuChatGPT/"""
-    lines = text.split("\n")
-    lines = [line for line in lines if line != ""]
-    count = 0
-    for i, line in enumerate(lines):
-        line = line.replace("$", "")
-        if "```" in line:
-            count += 1
-            items = line.split('`')
-            if count % 2 == 1:
-                lines[i] = f'<pre><code class="language-{items[-1]}">'
-            else:
-                lines[i] = f'<br></code></pre>'
-        else:
-            if i > 0:
-                if count % 2 == 1:
-                    line = line.replace("`", "\`")
-                    line = line.replace("<", "&lt;")
-                    line = line.replace(">", "&gt;")
-                    line = line.replace(" ", "&nbsp;")
-                    line = line.replace("*", "&ast;")
-                    line = line.replace("_", "&lowbar;")
-                    line = line.replace("-", "&#45;")
-                    line = line.replace(".", "&#46;")
-                    line = line.replace("!", "&#33;")
-                    line = line.replace("(", "&#40;")
-                    line = line.replace(")", "&#41;")
-                    line = line.replace("$", "&#36;")
-                lines[i] = "<br>"+line
-    text = "".join(lines)
-    return text
-
 def messeage_prepare(system_info, prompt_info):
         message = [
             {"role": "system", "content": system_info},
             {"role": "user", "content": prompt_info}
             ]
         return message
-
     
 def predict(user_input, chatbot):
     # Your prediction logic here
@@ -82,15 +48,14 @@ def predict(user_input, chatbot):
     docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=5)[0]
     knowledge = "\n".join([docs_and_scores[0].page_content for docs_and_scores in docs_and_scores_list])
     prompt_info =  "[檢索資料]\n{}\n\n[問題]\n{}".format(knowledge, user_input)
-    chatbot.append((parse_text(user_input), ""))
+    chatbot.append(user_input)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messeage_prepare(system_info, prompt_info),
         temperature = 0.1,
     )
 
-    chatbot[-1] = (parse_text(user_input), parse_text(response["choices"][0]["message"]["content"]))
-
+    chatbot[-1] = (user_input, response["choices"][0]["message"]["content"])
     print(chatbot)
     return chatbot
 
@@ -109,14 +74,14 @@ def chat():
         docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=5)[0]
         knowledge = "\n".join([docs_and_scores[0].page_content for docs_and_scores in docs_and_scores_list])
         prompt_info = "[檢索資料]\n{}\n\n[問題]\n{}".format(knowledge, user_input)
-        chatbot.append((parse_text(user_input), ""))
+        chatbot.append(user_input)
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messeage_prepare(system_info, prompt_info),
             temperature=0.1,
         )
 
-        chatbot[-1] = (parse_text(user_input), parse_text(response["choices"][0]["message"]["content"]))
+        chatbot[-1] = (user_input, response["choices"][0]["message"]["content"])
 
         # Get the chatbot response
         chatbot_response = predict(user_input, chatbot)
