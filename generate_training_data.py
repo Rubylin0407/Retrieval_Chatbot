@@ -96,7 +96,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--instruction_prefix', type=str, default="你是國泰世華的聊天機器人-阿發, 參考[檢索資料]使用中文簡潔和專業的回覆顧客的問題")
+    parser.add_argument('--instruction_prefix', type=str, default="你是聊天機器人 Retrieval Bot, 參考[檢索資料]使用中文簡潔和專業的回覆顧客的問題")
     parser.add_argument('--inference_data_template', type=str, default="langchain_<model>_k5.csv")
     parser.add_argument('--sft_model', type=str, default="gpt-4")
     parser.add_argument('--rm_rank', type=str, nargs='+', default=["gpt-4", "gpt-3.5-turbo", "chatglm", "vicuna"])
