@@ -15,7 +15,7 @@ from utils import (
 import datetime
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 import hashlib
-from crawler.database import get_db_connection, insert_data_into_mongodb, close_mongodb_connection, user_exists, create_user, check_validation
+from database import get_db_connection, insert_data_into_mongodb, close_mongodb_connection, user_exists, create_user
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -70,10 +70,6 @@ def predict(user_input, chatbot):
     print(f"response:{response}")
     chatbot[-1] = (response["choices"][0]["message"]["content"])
     return chatbot
-
-# Custom function to check if a user is signed in
-def is_user_signed_in():
-    return 'user_id' in session  # Check if the 'user_id' key is in the session
 
 @app.route('/')
 def index():
@@ -156,7 +152,7 @@ def user_sign_in():
             print(f"Error when logging in: {str(e)}")
             return jsonify("An error occurred while logging in."), 500
 
-@app.route('/user/logout/')
+@app.route('/user/logout')
 def logout():
     session.pop('logged_in', None)
     return render_template('index.html')
