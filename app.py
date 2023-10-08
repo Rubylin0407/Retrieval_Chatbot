@@ -1,8 +1,7 @@
-from flask import Flask, render_template,jsonify,request
+from flask import Flask, render_template,jsonify,request, session
 from flask_cors import CORS
-import requests, openai, os
+import openai, os
 from dotenv import load_dotenv
-
 import opencc
 import mdtex2html
 import gradio as gr
@@ -13,6 +12,10 @@ from utils import (
     initial_or_read_langchain_database_faiss,
 )
 
+import datetime
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+import hashlib
+from crawler.database import get_db_connection, insert_data_into_mongodb, close_mongodb_connection, user_exists, create_user, check_validation
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -24,6 +27,16 @@ s2t = opencc.OpenCC('s2t.json')
 
 app = Flask(__name__)
 CORS(app)
+
+app.secret_key = os.getenv("secret_key")
+
+user_db_name = os.getenv("USER_DB_NAME")
+users_collection = get_db_connection(user_db_name)["user_info"]
+
+app.config['JWT_SECRET_KEY'] = os.getenv("JWT_secret_key")
+jwt = JWTManager()
+JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=15)
+jwt.init_app(app)
 
 def postprocess(self, y):
     if y is None:
@@ -58,6 +71,10 @@ def predict(user_input, chatbot):
     chatbot[-1] = (response["choices"][0]["message"]["content"])
     return chatbot
 
+# Custom function to check if a user is signed in
+def is_user_signed_in():
+    return 'user_id' in session  # Check if the 'user_id' key is in the session
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -83,6 +100,66 @@ def chat():
         print(e)
         error_message = f'Error: {str(e)}'
         return jsonify({"message":error_message,"response":False})
+
+@app.route('/user/signup', methods=['GET', 'POST'])
+def user_signup():
+    if request.method == 'GET':
+        return render_template('signup.html')
+    if request.method == 'POST':
+        try:
+            provider = "native"
+            data = request.form
+
+            name, email, password = data.get('name'), data.get('email'), data.get('password')
+            
+            if not all([name, email, password]):
+                return jsonify({"error": "Name, email, and password are required."}), 400
+            
+            if user_exists(email, users_collection):
+                return jsonify({"error": "Email already exists."}), 403
+            
+            # Store user information in MongoDB
+            create_user(name, email, password, provider, users_collection)   
+            return render_template('login.html')
+        except Exception as e:
+            print(f"Error when signing up: {str(e)}")
+            return jsonify("An error occurred while signing up."), 500
+
+@app.route('/user/login', methods=['GET', 'POST'])
+def user_sign_in():
+    if request.method == 'GET':
+        return render_template('login.html')
+    if request.method == 'POST':
+        try:
+            data = request.form
+            provider = "native"
+            email, password = data.get('email'), data.get('password')
+            
+            if not all([email, password, provider]):
+                return jsonify("Email and password are required."), 400
+            
+            user_data = user_exists(email, users_collection)
+            print(user_data)
+            if provider == "native":
+                # stored_password = user_data.get("password", "")
+                stored_password = user_data["password"]
+                # Hash the provided password and compare it with the stored password
+                provided_password_hash = hashlib.sha256(password.encode()).hexdigest()
+                if provided_password_hash != stored_password:
+                    return jsonify({"Wrong password"}), 403
+                else: 
+                    session['logged_in'] = True
+                    session['username'] = user_data["name"]
+                    print("Successfully logging in")
+            return render_template('index.html')
+        except Exception as e:
+            print(f"Error when logging in: {str(e)}")
+            return jsonify("An error occurred while logging in."), 500
+
+@app.route('/user/logout/')
+def logout():
+    session.pop('logged_in', None)
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
