@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatBot</title>
+    <title>旅行團行程小幫手</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         .container {
             display: flex;
@@ -90,6 +91,7 @@
             width: 100%;
             padding: 3px;
             box-shadow: 1px 1px 5px #80808057;
+            z-index: 2;
         }
     </style>
 </head>
@@ -99,7 +101,7 @@
     <nav class="bg-white border-gray-200 dark:bg-gray-900">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="#" class="flex items-center">
-                <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">ChatBot</span>
+                <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">旅行團行程小幫手</span>
             </a>
 
 
@@ -108,139 +110,69 @@
 
     <div class="container">
         <div class="box">
-            <div class="upper" id="upperid">
-                <span class="downwarning">Type your message in box below.</span>
-                
+            <!-- Your existing chat UI code here -->
+            
+            <!-- Placeholder for Bar Chart -->
+            <div id="bar-chart"></div>
+    
+            <!-- Placeholder for Bubble Plot -->
+            <div id="bubble-plot"></div>
+    
+            <!-- Search History Section (Add your code for displaying search history here) -->
+            <div id="search-history"></div>
+            <!-- Display search history here -->          
 
-            </div>
+            <div id="chatbot-container"></div>
 
-            <div class="bottom">
-                <form id="userinputform" action="/chat" method="POST">
-                    <label for="chat" class="sr-only">Your message</label>
-                    <div class="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-
-                        <textarea id="userinput" rows="1"
-                            class="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder="Your message..." required></textarea>
-                        <button type="submit"
-                            class="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
-                            id="sendbtn">
-                            <svg aria-hidden="true" class="w-6 h-6 rotate-90" fill="currentColor" viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z">
-                                </path>
-                            </svg>
-                            <span class="sr-only">Send message</span>
-                        </button>
-                    </div>
-                </form>
-              
-                <span class="downwarning">Remember Your Chat will not be saved, it will be lost upon reloading.</span>
-            </div>
         </div>
     </div>
 
 
+    <!-- Add JavaScript code for Plotly charts -->
     <script>
-        // for scrolling messages
-        function scrollToBottom() {
-            var div = document.getElementById("upperid");
-            div.scrollTop = div.scrollHeight;
-        }
-        scrollToBottom();
-
-        document.getElementById("userinputform").addEventListener("submit", function (event) {
-            event.preventDefault();
-            formsubmitted();
-        });
-
-        // sending request to python server
-        const formsubmitted = async () => {
-            let userinput = document.getElementById('userinput').value;
-            let sendbtn = document.getElementById('sendbtn');
-            let userinputarea = document.getElementById('userinput');
-            let upperdiv = document.getElementById('upperid');
-
-            upperdiv.innerHTML = upperdiv.innerHTML + `<div class="message">
-                <div class="usermessagediv">
-                    <div class="usermessage">
-                        ${userinput}
-                    </div>
-                </div>
-            </div>`;
-            sendbtn.disabled = true;
-            userinputarea.disabled = true;
-            scrollToBottom();
-            document.getElementById('userinput').value = "";
-            document.getElementById('userinput').placeholder = "Wait . . .";
-
-            try {
-                const response = await fetch("/chat", {  // Use a relative URL here
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ data: userinput })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const json = await response.json();
-
-                document.getElementById('userinput').placeholder = "Your message...";
-
-                if (json.response) {
-                    let message = json.message;
-                    message = message.toString();
-
-                    upperdiv.innerHTML = upperdiv.innerHTML + `<div class="message">
-                        <div class="appmessagediv">
-                            <div class="appmessage" id="temp">
-
-                            </div>
-                        </div>
-                    </div>`;
-                    let temp = document.getElementById('temp');
-                    let index = 0;
-
-                    function displayNextLetter() {
-                        scrollToBottom();
-                        if (index < message.length) {
-                            temp.innerHTML = temp.innerHTML + message[index];
-                            index++;
-                            setTimeout(displayNextLetter, 30);
-                        } else {
-                            temp.removeAttribute('id');
-                            sendbtn.disabled = false;
-                            userinputarea.disabled = false;
-                        }
-                    }
-                    displayNextLetter();
-                    scrollToBottom();
-                } else {
-                    let message = json.message;
-                    upperdiv.innerHTML = upperdiv.innerHTML +
-                        `<div class="message">
-                            <div class="appmessagediv">
-                                <div class="appmessage"  style="border: 1px solid red;">
-                                    ${message}
-                                </div>
-                            </div>
-                        </div>`;
-                    sendbtn.disabled = false;
-                    userinputarea.disabled = false;
-                }
-
-                scrollToBottom();
-            } catch (error) {
-                console.error(error);
-                // Handle the error gracefully here, you can display an error message to the user.
+        // Create a sample bar chart
+        var barData = [
+            {
+                x: ['Category A', 'Category B', 'Category C'],
+                y: [10, 20, 15],
+                type: 'bar'
             }
-        };
+        ];
+        Plotly.newPlot('bar-chart', barData);
+    
+        // Create a sample bubble plot
+        var bubbleData = [
+            {
+                x: [1, 2, 3],
+                y: [10, 11, 12],
+                mode: 'markers',
+                marker: {
+                    size: [30, 80, 50]
+                }
+            }
+        ];
+        Plotly.newPlot('bubble-plot', bubbleData);
+    
+        // Add code for displaying search history (you'll need to update this)
+        function displaySearchHistory(history) {
+            // Display search history items here
+        }
+        
+        // Add this JavaScript code inside the <script> tag in index.html
+        document.addEventListener('DOMContentLoaded', function () {
+        // Function to create and embed the chatbot iframe
+        function embedChatbot() {
+            const chatbotContainer = document.getElementById('chatbot-container');
+            const iframe = document.createElement('iframe');
+            iframe.src = '/chatbot'; // URL of the chatbot.html page
+            iframe.frameBorder = 0;
+            iframe.width = '100%';
+            iframe.height = '600px'; // Set the desired height
+            chatbotContainer.appendChild(iframe);
+        }
+
+        // Call the function to embed the chatbot when the page loads
+        embedChatbot();
+    });
     </script>
 </body>
-
-</html>
