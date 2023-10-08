@@ -47,21 +47,24 @@ def predict(user_input, chatbot):
     system_info = "你是聊天機器人 Retrieval Bot, [檢索資料]是由 Ruby Lin 提供的。 參考[檢索資料]使用中文簡潔和專業的回覆顧客的[問題], 如果答案不在資料中, 請說 “對不起, 我所擁有的資料中沒有相關資訊, 請您換個問題或將問題描述得更詳細, 讓我能正確完整的回答您”\n\n"
     docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=5)[0]
     knowledge = "\n".join([docs_and_scores[0].page_content for docs_and_scores in docs_and_scores_list])
-    prompt_info =  "[檢索資料]\n{}\n\n[問題]\n{}".format(knowledge, user_input)
+    prompt_info =  "[檢索資料]\n{}\n[問題]\n{}".format(knowledge, user_input)
     chatbot.append(user_input)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messeage_prepare(system_info, prompt_info),
         temperature = 0.1,
     )
-
-    chatbot[-1] = (user_input, response["choices"][0]["message"]["content"])
-    print(chatbot)
+    print(f"response:{response}")
+    chatbot[-1] = (response["choices"][0]["message"]["content"])
     return chatbot
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/chatbot')
+def chatbot():
+    return render_template('chatbot.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -70,24 +73,12 @@ def chat():
         print(user_input)
         chatbot = []  # Initialize an empty chatbot conversation
 
-        system_info = "你是聊天機器人 Retrieval Bot, [檢索資料]是由 Ruby Lin 提供的。 參考[檢索資料]使用中文簡潔和專業的回覆顧客的[問題], 如果答案不在公開資料中, 請說 “對不起, 我所擁有的資料中沒有相關資訊, 請您換個問題或將問題描述得更詳細, 讓我能正確完整的回答您”\n\n"
-        docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=5)[0]
-        knowledge = "\n".join([docs_and_scores[0].page_content for docs_and_scores in docs_and_scores_list])
-        prompt_info = "[檢索資料]\n{}\n\n[問題]\n{}".format(knowledge, user_input)
-        chatbot.append(user_input)
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=messeage_prepare(system_info, prompt_info),
-            temperature=0.1,
-        )
-
-        chatbot[-1] = (user_input, response["choices"][0]["message"]["content"])
-
         # Get the chatbot response
-        chatbot_response = predict(user_input, chatbot)
-        print(chatbot_response)
+        response = predict(user_input, chatbot)
+        print(f"predict_response:{response}")
+        print(jsonify({"response": True, "message": response}))
 
-        return jsonify({"response": True, "message": chatbot_response})
+        return jsonify({"response": True, "message": response})
     except Exception as e:
         print(e)
         error_message = f'Error: {str(e)}'
