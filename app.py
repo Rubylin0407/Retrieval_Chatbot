@@ -13,9 +13,10 @@ from utils import (
 )
 
 import datetime
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import JWTManager
 import hashlib
-from database import get_db_connection, insert_data_into_mongodb, close_mongodb_connection, user_exists, create_user
+from database import (get_db_connection, insert_data_into_mongodb, close_mongodb_connection, user_exists, create_user, get_qa_history_from_mongodb,
+    insert_fav, delete_fav)
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -32,6 +33,7 @@ app.secret_key = os.getenv("secret_key")
 
 user_db_name = os.getenv("USER_DB_NAME")
 users_collection = get_db_connection(user_db_name)["user_info"]
+QA_history_collection = get_db_connection(user_db_name)["QA_history"]
 
 app.config['JWT_SECRET_KEY'] = os.getenv("JWT_secret_key")
 jwt = JWTManager()
@@ -79,18 +81,101 @@ def index():
 def chatbot():
     return render_template('chatbot.html')
 
+@app.route('/api/get-qa-history')
+def get_qa_history():
+    try:
+        if session.get('logged_in'):
+            email = session.get('email')
+            user_data = get_qa_history_from_mongodb(email, QA_history_collection)
+            # Check if user_data is not []
+            if len(user_data) !=0:
+                return jsonify(user_data)
+            else:
+                return jsonify([])  # Return an empty array if user_data is None
+        else:
+            return jsonify({"error": "User not logged in"})
+    except Exception as e:
+        print(f"Failed to fetch data from QA_history_collection: {str(e)}")
+        return jsonify({"error": "Failed to fetch QA history"})
+
+@app.route('/api/get-user-favorites')
+def get_fav():
+    try:
+        email = session.get('email')
+        fav_collection = get_db_connection(user_db_name)["favorites"]
+        # Query MongoDB for all documents with the specified email
+        cursor = fav_collection.find({"email": email})
+
+        # Initialize an empty list to store question and answer pairs
+        fav_lst = []
+
+        # Iterate through the cursor and extract 'question' and 'answer' from each document
+        for doc in cursor:
+            if 'email' in doc:
+                fav_lst.append({
+                    'QA_pair_id': doc['QA_pair_id']
+                })
+
+        # Always return a valid JSON response
+        return jsonify(fav_lst)
+
+    except Exception as e:
+        print(f"Failed to check data from {fav_collection.name}: {str(e)}")
+        return jsonify([])  # Handle the error gracefully with an empty JSON array
+
+@app.route('/api/add-favorite', methods = ['POST'])
+def add_favorite():
+    try:
+        data = request.get_json()
+        QA_pair_id = data.get('QA_pair_id')
+
+        # The rest of your code to add the favorite goes here
+        email = session.get('email')
+        insert_fav(email, QA_pair_id)
+        
+        # Return a response indicating success if needed
+        return jsonify({'message': 'Favorite added successfully'})
+    except Exception as e:
+        print(f"Failed to add favorite: {str(e)}")
+        # Handle errors and return an appropriate response
+        return jsonify({'error': 'Failed to add favorite'}), 500  # HTTP status code 500 for internal server error
+
+@app.route('/api/remove-favorite', methods = ['POST'])
+def remove_favorite():
+    try:
+        data = request.get_json()
+        print(f"data:{data}")
+        QA_pair_id = data.get('QA_pair_id')
+        print(QA_pair_id)
+
+        # The rest of your code to add the favorite goes here
+        email = session.get('email')
+        delete_fav(email, QA_pair_id)
+        
+        # Return a response indicating success if needed
+        return jsonify({'message': 'Favorite added successfully'})
+    except Exception as e:
+        print(f"Failed to remove favorite: {str(e)}")
+        # Handle errors and return an appropriate response
+        return jsonify({'error': 'Failed to remove favorite'}), 500  # HTTP status code 500 for internal server error
+
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
         user_input = request.get_json().get('data')
-        print(user_input)
         chatbot = []  # Initialize an empty chatbot conversation
 
         # Get the chatbot response
         response = predict(user_input, chatbot)
         print(f"predict_response:{response}")
-        print(jsonify({"response": True, "message": response}))
-
+        if session['logged_in'] == True:
+            QA_pair = {
+                    "email": session['email'],
+                    "question": user_input,
+                    "answer": response
+                }
+            # insert user's question and chatbot's response into mongodb
+            QA_history_collection.insert_one(QA_pair)
         return jsonify({"response": True, "message": response})
     except Exception as e:
         print(e)
@@ -133,19 +218,19 @@ def user_sign_in():
             
             if not all([email, password, provider]):
                 return jsonify("Email and password are required."), 400
-            
+            # if user exist, return user_information, including user name, email and hashed password
             user_data = user_exists(email, users_collection)
-            print(user_data)
+            # print(user_data)
             if provider == "native":
-                # stored_password = user_data.get("password", "")
-                stored_password = user_data["password"]
                 # Hash the provided password and compare it with the stored password
                 provided_password_hash = hashlib.sha256(password.encode()).hexdigest()
+                stored_password = user_data["password"]
                 if provided_password_hash != stored_password:
                     return jsonify({"Wrong password"}), 403
                 else: 
                     session['logged_in'] = True
-                    session['username'] = user_data["name"]
+                    session['name'] = user_data["name"]
+                    session['email'] = user_data["email"]
                     print("Successfully logging in")
             return render_template('index.html')
         except Exception as e:

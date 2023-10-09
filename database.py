@@ -4,11 +4,14 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify
 import hashlib
+from bson import json_util
 load_dotenv()
 
 # MongoDB connection details
 mongo_url = os.getenv("MONGODB_URL")
 client = pymongo.MongoClient(mongo_url)
+
+user_db_name = os.getenv("USER_DB_NAME")
 
 def get_db_connection(database_name):
     # Connect to MongoDB
@@ -32,6 +35,56 @@ def insert_unique_url_into_mongodb(urls, collection):
             collection.insert_one(url)
             print(f"Inserted URL: {url['url']} into {collection.name}")
         # else: not insert, because URL already exists in the collection
+
+def get_qa_history_from_mongodb(email, collection):
+    try:
+        # Query MongoDB for all documents with the specified email
+        cursor = collection.find({"email": email})
+        
+        # Initialize an empty list to store question and answer pairs
+        qa_pairs = []
+        if cursor:
+            # Iterate through the cursor and extract 'question' and 'answer' from each document
+            for doc in cursor:
+                # print(doc)
+                if 'question' in doc and 'answer' in doc:
+                    doc['_id'] = json_util.dumps(doc['_id'])
+                    qa_pairs.append({
+                        '_id': doc['_id'],
+                        'question': doc['question'],
+                        'answer': doc['answer']
+                    })
+
+        return qa_pairs
+    except Exception as e:
+        print(f"Failed to check data from {collection.name}: {str(e)}")
+        return None  # Handle the error gracefully
+
+def insert_fav(email, QA_pair_id):
+    try:
+        fav_collection = get_db_connection(user_db_name)["favorites"]
+        with client.start_session() as session:
+            fav_data = {
+                "email": email,
+                "QA_pair_id": QA_pair_id,
+            }
+            fav_collection.insert_one(fav_data) 
+            print(f"Successfully inserted favorite data into {fav_collection.name}")
+    except Exception as e:
+        print(f"Failed to insert favorite data into {fav_collection.name}: {str(e)}")
+
+def delete_fav(email, QA_pair_id):
+    try:
+        fav_collection = get_db_connection(user_db_name)["favorites"]
+        with client.start_session() as session:
+            fav_data = {
+                "email": email,
+                "QA_pair_id": QA_pair_id,
+            }
+            fav_collection.delete_one(fav_data) 
+            print(f"Successfully inserted favorite data into {fav_collection.name}")
+    except Exception as e:
+        print(f"Failed to insert favorite data into {fav_collection.name}: {str(e)}")
 
 # check if user already exist in database
 def user_exists(email, collection):
