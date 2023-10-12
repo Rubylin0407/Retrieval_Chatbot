@@ -213,19 +213,20 @@ def user_signup():
             data = request.form
 
             name, email, password = data.get('name'), data.get('email'), data.get('password')
+            print(name, email, password)
             
             if not all([name, email, password]):
-                return jsonify({"error": "Name, email, and password are required."}), 400
+                return "Name, email, and password are required.", 400
             
             if user_exists(email, users_collection):
-                return jsonify({"error": "Email already exists."}), 403
+                return "Email already exists.", 403
             
             # Store user information in MongoDB
             create_user(name, email, password, provider, users_collection)   
             return render_template('login.html')
         except Exception as e:
             print(f"Error when signing up: {str(e)}")
-            return jsonify("An error occurred while signing up."), 500
+            return "An error occurred while signing up.", 500
 
 @app.route('/user/login', methods=['GET', 'POST'])
 def user_sign_in():
@@ -247,7 +248,7 @@ def user_sign_in():
                 provided_password_hash = hashlib.sha256(password.encode()).hexdigest()
                 stored_password = user_data["password"]
                 if provided_password_hash != stored_password:
-                    return jsonify({"Wrong password"}), 403
+                    return "Wrong password.", 403
                 else: 
                     session['logged_in'] = True
                     session['name'] = user_data["name"]
@@ -256,7 +257,7 @@ def user_sign_in():
             return render_template('index.html')
         except Exception as e:
             print(f"Error when logging in: {str(e)}")
-            return jsonify("An error occurred while logging in."), 500
+            return "An error occurred while logging in.", 500
 
 @app.route('/user/logout')
 def logout():
