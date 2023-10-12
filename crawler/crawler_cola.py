@@ -7,7 +7,8 @@ from crawler.database import get_db_connection, insert_unique_url_into_mongodb, 
 
 load_dotenv()
 
-collection_cola = get_db_connection()["cola_raw_url"]
+data_db_name = os.getenv("DATA_DB_NAME")
+collection_cola = get_db_connection(data_db_name)["cola_raw_url"]
 
 def crawl_cola():
     base_url = "https://www.colatour.com.tw/C000_Portal/C000_HP01A_Main.aspx?TourArea=A"

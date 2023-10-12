@@ -3,12 +3,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from dotenv import load_dotenv
 import os
-from database import get_db_connection, insert_crawler_data_into_mongodb, close_mongodb_connection
+from crawler.database import get_db_connection, insert_data_into_mongodb, close_mongodb_connection
 
 load_dotenv()
 
 # Use the absolute path to the .env file
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+
+data_db_name = os.getenv("DATA_DB_NAME")
 
 # Initialize the Selenium WebDriver
 options = Options()
@@ -16,10 +18,10 @@ options.add_argument('--headless')
 driver = webdriver.Chrome(options=options)
 
 # Specify the collection to query
-fetch_url_collection = get_db_connection()["cola_raw_url"]
+fetch_url_collection = get_db_connection(data_db_name)["cola_raw_url"]
 
 # Specify the collection to insert
-insert_url_collection = get_db_connection()["cola_raw_data"]
+insert_url_collection = get_db_connection(data_db_name)["cola_raw_data"]
 
 # perform the query: find all
 documents_url = fetch_url_collection.find({})
@@ -34,9 +36,11 @@ def get_data_from_each_page_cola():
         # Navigate to the web page
         # ex: driver.get('https://www.colatour.com.tw/C10A_TourSell/C10A16_TourItinerary.aspx?PatternNo=213465')
         driver.get(document["url"])
+
         try:
-            # Locate the element by its class name
+            # # Locate the element by its class name
             element = driver.find_element(By.CLASS_NAME, 'mainContainer_itinerary')
+            #element = driver.find_element_by_tag_name('itinerarytitle')
 
             # Remove newline characters (\n) from the text and replace them with spaces
             cleaned_text = element.text.replace('\n', ' ')
@@ -67,7 +71,7 @@ lst_of_dic_data, lst_of_url_to_be_deleted = get_data_from_each_page_cola()
 
 # insert data into mongodb
 if len(lst_of_dic_data) != 0:
-    insert_crawler_data_into_mongodb(lst_of_dic_data, insert_url_collection)
+    insert_data_into_mongodb(lst_of_dic_data, insert_url_collection)
 
 # Delete documents with matching URLs
 if len(lst_of_url_to_be_deleted) != 0:

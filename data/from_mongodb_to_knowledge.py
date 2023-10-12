@@ -1,7 +1,7 @@
 import pymongo
 from dotenv import load_dotenv
 import os
-from crawler.database import get_db_connection, close_mongodb_connection
+from database import get_db_connection, close_mongodb_connection
 
 load_dotenv()
 
