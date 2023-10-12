@@ -11,74 +11,64 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+P6i1EnyFp5Fm8afLRSc5AI5j6b0Piv5S9ezcLw4Pb3UrRY" crossorigin="anonymous">
     <style>
+        body {
+            font-family: 'Arial', sans-serif; /* Ensuring a clear font is used */
+        }
+    
+        .bg-image::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://images.unsplash.com/photo-1433838552652-f9a46b332c40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8NHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            opacity: 0.6;
+            z-index: -1; /* Keeps the background behind the content */
+        }
+
         .container {
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
+    
         .box {
             width: min(95%, 800px);
             height: 100vh;
             margin-top: 85px;
+            background-color: #f7fafc; /* Light gray background for clarity */
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+            overflow: hidden;
         }
-
+    
         .bottom {
             position: fixed;
             bottom: 0;
             padding-bottom: 5%;
-            background-color: white;
+            background-color: #ffffff;
             width: min(95%, 800px);
         }
-
-        .message {
-            margin: 20px;
-        }
-
-        .usermessagediv {
-            display: flex;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-            margin-left: 20%;
-        }
-
-        .usermessage {
-            background-color: #097df1;
-            color: #fff;
-            padding: 0.5rem .875rem;
-            border-radius: 20px;
-        }
-
-        .appmessagediv {
-            display: flex;
-            justify-content: flex-start;
-            flex-wrap: wrap;
-            margin-right: 20%;
-            white-space: pre-line;
-        }
-
-        .appmessage {
-            background-color: #e5e5ea;
-            color: #000;
-            padding: 0.5rem .875rem;
-            border-radius: 20px;
-        }
-
+    
         .upper {
             max-height: 100%;
             padding-top: 40px;
             padding-bottom: 170px;
             overflow: auto;
         }
-
+    
         .upper::-webkit-scrollbar {
             width: 0 !important
         }
-
+    
         #sendbtn:disabled {
             opacity: 0.6;
         }
-
+    
         .downwarning {
             display: flex;
             justify-content: center;
@@ -86,64 +76,79 @@
             font-size: 90%;
             color: gray;
         }
-
+    
         nav {
             position: fixed;
             width: 100%;
             padding: 3px;
-            box-shadow: 1px 1px 5px #80808057;
+            background-color: #ffe5c1; /* soft, semi-transparent gray */
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2); /* subtle shadow for an elevated feel */
             z-index: 2;
-        }
-        #QA-history-table, #fav-table caption {
-            border-collapse: collapse; /* Collapse table borders */
-            width: 100%;
+            backdrop-filter: blur(2px); /* adds a slight blur to the content behind the nav for depth */
         }
 
-        #QA-history-table th,
-        #QA-history-table td {
-            border: 1px solid transparent; /* Set border to transparent */
-            padding: 8px;
-            text-align: left;
+        /* Additional CSS for clarity and spacing */
+        .nav-right {
+            margin-left: auto; /* Push the content to the right edge */
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Creates a gap between elements inside */
         }
 
-        #QA-history-table th {
-            background-color: skyblue; /* Header background color */
+        .nav-separator {
+            height: 20px;
+            border-left: 1px solid #ccc; /* A soft gray vertical separator */
+            margin: 0 15px; /* Spacing on both sides of the separator */
         }
 
-        #QA-history-table tr:nth-child(even), #fav-table caption tr:nth-child(even) {
-            background-color: #f2f2f2; /* Alternate row background color */
+        /* Update color for text to dark gray */
+        a, span {
+            color: #333333;
         }
-        #QA-history-table th:first-child,
-        #QA-history-table td:first-child {
-            width: 25%; /* Adjust the width of first column*/
+
+        a:hover, a:focus {
+            color: #555555; /* A slightly lighter gray for hover and focus states */
+            text-decoration: none;
         }
-        /* Adjust the width of the third column in the table */
-        #QA-history-table th:nth-child(3),
-        #QA-history-table td:nth-child(3) {
-            width: 10%; /* Adjust the width as needed */
+
+
+        /* Hover effects for better user experience */
+        a:hover, a:focus {
+            color: #3182ce; /* Using the brighter blue */
+            text-decoration: none;
         }
-        #QA-history-table caption, #fav-table caption {
-            font-size: 18px; 
-            font-weight: bold; 
-            text-align: center; 
-            padding: 10px; 
+
+        #chatbot-container iframe {
+            border-radius: 15px; /* Adjust the value as per your desired roundness */
+            overflow: hidden;    /* Ensures content inside respects the rounded corners */
         }
+
     </style>
+    
 </head>
 
-<body>
+<body class="bg-image">
 
-    <nav class="bg-white border-gray-200 dark:bg-gray-900">
+    <nav>
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-            <a href="#" class="flex items-center">
+            <a href="/" class="flex items-center">
                 <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">旅行團行程小幫手</span>
             </a>
-            
+
+            <!-- Add the buttons to the navigation bar -->
             <div class="flex space-x-4">
                 {% if session['logged_in'] %}
-                    <!-- Display username when logged in -->
-                    <span class="text-gray-600">Hello, {{ session['name'] }}!</span>
-                    <a href="/user/logout" class="text-gray-600 hover:text-gray-800">Log out</a>
+                <!-- Add History and Favorites buttons -->
+                    <a href="/searchhistory" >歷史紀錄</a>
+                    <a href="/favorites" >我的最愛</a>
+        
+                    <div class="nav-separator"></div> <!-- Separator for clarity -->
+        
+                    <!-- Container for greeting and logout -->
+                    <div class="nav-right">
+                        <!-- Display username when logged in -->
+                        <span class="text-gray-600">Hello, {{ session['name'] }}!</span>
+                        <a href="/user/logout" class="text-gray-600 hover:text-gray-800">Log out</a>
                 {% else %}
                     <!-- Display login and signup links when not logged in -->
                     <a href="/user/login" class="text-gray-600 hover:text-gray-800">Log in</a>
@@ -153,187 +158,15 @@
         </div>
     </nav>
     
+    
     <div class="container">
         <div class="box">
-            <div id="QA-history"></div>
-
-            {% if session['logged_in'] %}
-                <table id="fav-table">
-                    <caption>我的最愛</caption>
-                    <thead>
-                        <tr>
-                            <th>提問</th>
-                            <th>回答</th>
-                        </tr>
-                    </thead>
-                </table>
-                <table id="QA-history-table">
-                    <caption>歷史提問紀錄</caption>
-                    <thead>
-                        <tr>
-                            <th>提問</th>
-                            <th>回答</th>
-                            <th>加到我的最愛</th>
-                        </tr>
-                    </thead>
-                </table>
-            {% endif %}
-            <!-- Placeholder for Bar Chart -->
-            <div id="bar-chart"></div>
-    
-            <!-- Placeholder for Bubble Plot -->
-            <div id="bubble-plot"></div>      
-
             <div id="chatbot-container"></div>
 
         </div>
     </div>
 
-    <script>
-        // Call the fetchQAHistory function when the page loads
-        document.addEventListener('DOMContentLoaded', function () {
-            fetchQAHistory();
-        });
-    
-        // Function to fetch QA-history data from MongoDB and display question-answer pairs in a table
-        async function fetchQAHistory() {
-            try {
-                const response = await fetch('/api/get-qa-history');
-                const user_data = await response.json();
-    
-                // Get a reference to the table element in your HTML
-                const table = document.getElementById('QA-history-table');
-    
-                // Fetch the user's favorite items
-                const favorites = await fetchUserFavorites(); // Implement this function
-    
-                // Loop through the user_data and create table rows for each question-answer pair
-                user_data.forEach(entry => {
-                    const question = entry.question;
-                    const answers = entry.answer.join(', ');
-                    const QA_pair_id = entry._id;
-    
-                    // Create a new table row
-                    const row = table.insertRow();
-    
-                    // Create table cells for question and answers
-                    const questionCell = row.insertCell(0);
-                    const answerCell = row.insertCell(1);
-    
-                    // Populate the table cells with question and answers
-                    questionCell.innerText = `${question}`;
-                    answerCell.innerText = `${answers}`;
-    
-                    // Create a button cell and button element
-                    const buttonCell = row.insertCell(2);
-                    const addButton = document.createElement('button');
-    
-                    // Check if the current item is in the user's favorites
-                    if (favorites.includes(QA_pair_id)) {
-                        addButton.classList.add('favorite');
-                        addButton.innerHTML = '&#10084;'; // Solid heart
-                    } else {
-                        addButton.innerHTML = '&#9825'; // Outline heart
-                    }
-    
-                    addButton.addEventListener('click', () => {
-                        // Handle the "Add to Favorites" action here
-                        addToFavorites(QA_pair_id, addButton);
-                    });
-                    buttonCell.appendChild(addButton);
-                });
-            } catch (error) {
-                console.error('Error fetching QA-history data:', error);
-            }
-        }
-
-    
-        // Function to fetch the user's favorite items
-        async function fetchUserFavorites() {
-            try {
-                const response = await fetch('/api/get-user-favorites');
-                const favorites = await response.json();
-                return favorites.map(fav => fav.QA_pair_id);
-            } catch (error) {
-                console.error('Error fetching user favorites:', error);
-                return [];
-            }
-        }
-    
-        // Function to handle the "Add to Favorites" action
-        function addToFavorites(QA_pair_id, button) {
-            // Check if the button already has a class "favorite"
-            if (button.classList.contains('favorite')) {
-                // If it does, remove the class and change the heart to outline
-                button.classList.remove('favorite');
-                button.innerHTML = '&#9825'; // Change to outline heart
-                // Implement your logic to remove the item from favorites here
-                removeFavorite(QA_pair_id);
-            } else {
-                // If it doesn't have the class, add the class and change the heart to solid
-                button.classList.add('favorite');
-                button.innerHTML = '&#10084;'; // Change to solid heart
-                // Implement your logic to add the item to favorites here
-                addFavorite(QA_pair_id);
-            }
-        }
-    
-        // Function to add an item to the user's favorites
-        async function addFavorite(QA_pair_id) {
-            try {
-                await fetch('/api/add-favorite', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({QA_pair_id })
-                });
-                console.log('Added to Favorites:', QA_pair_id);
-            } catch (error) {
-                console.error('Error adding to Favorites:', error);
-            }
-        }
-    
-        // Function to remove an item from the user's favorites
-        async function removeFavorite(QA_pair_id) {
-            try {
-                await fetch('/api/remove-favorite', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ QA_pair_id })
-                });
-                console.log('Removed from Favorites:', QA_pair_id);
-            } catch (error) {
-                console.error('Error removing from Favorites:', error);
-            }
-        }
-
-        // Create a sample bar chart
-        var barData = [
-            {
-                x: ['Category A', 'Category B', 'Category C'],
-                y: [10, 20, 15],
-                type: 'bar'
-            }
-        ];
-        Plotly.newPlot('bar-chart', barData);
-    
-        // Create a sample bubble plot
-        var bubbleData = [
-            {
-                x: [1, 2, 3],
-                y: [10, 11, 12],
-                mode: 'markers',
-                marker: {
-                    size: [30, 80, 50]
-                }
-            }
-        ];
-        Plotly.newPlot('bubble-plot', bubbleData);
-    
-        
+    <script>   
         document.addEventListener('DOMContentLoaded', function () {
         // Function to create and embed the chatbot iframe
         function embedChatbot() {
@@ -342,7 +175,7 @@
             iframe.src = '/chatbot'; // URL of the chatbot.html page
             iframe.frameBorder = 0;
             iframe.width = '100%';
-            iframe.height = '800px'; // Set the desired height
+            iframe.height = '700px'; // Set the desired height
             chatbotContainer.appendChild(iframe);
         }
 
