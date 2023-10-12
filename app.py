@@ -82,13 +82,20 @@ def chatbot():
     return render_template('chatbot.html')
 
 @app.route('/searchhistory', methods=['GET']) 
-def search_history():     
-    return render_template('searchhistory.html')
+def search_history():
+    try:
+        if session.get('logged_in', False) == True:
+            return render_template('searchhistory.html')
+        else:
+            return render_template('login.html')
+    except Exception as e:
+        print(f"Error when fetching search history page: {str(e)}")
+        return jsonify({"error": "Failed to fetch QA history"})
 
 @app.route('/api/get-qa-history')
 def get_qa_history():
     try:
-        if session.get('logged_in'):
+        if session.get('logged_in', False) == True:
             email = session.get('email')
             user_data = get_qa_history_from_mongodb(email, QA_history_collection)
             # Check if user_data is not []
@@ -106,7 +113,7 @@ def get_qa_history():
 @app.route('/api/get-user-favorites')
 def get_fav():
     try:
-        if session.get('logged_in'):
+        if session.get('logged_in', False) == True:
             email = session.get('email')
             fav_collection = get_db_connection(user_db_name)["favorites"]
             # Query MongoDB for all documents with the specified email
@@ -165,12 +172,19 @@ def remove_favorite():
 
 @app.route('/favorites', methods=['GET']) 
 def favorites():     
-    return render_template('favorites.html')
+    try:
+        if session.get('logged_in', False) == True:   
+            return render_template('favorites.html')
+        else:
+            return render_template('login.html')
+    except Exception as e:
+        print(f"Error when fetching search history page: {str(e)}")
+        return jsonify({"error": "Failed to fetch QA history"})
 
 @app.route('/api/get-favorites')
 def get_favorites():
     try:
-        if session.get('logged_in'):
+        if session.get('logged_in', False) == True:
             email = session.get('email')
             fav_lst = get_favorites_from_mongodb(email)
             # Always return a valid JSON response

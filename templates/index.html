@@ -138,18 +138,22 @@
             <div class="flex space-x-4">
                 {% if session['logged_in'] %}
                 <!-- Add History and Favorites buttons -->
-                    <a href="/searchhistory" >歷史紀錄</a>
-                    <a href="/favorites" >我的最愛</a>
-        
-                    <div class="nav-separator"></div> <!-- Separator for clarity -->
-        
-                    <!-- Container for greeting and logout -->
-                    <div class="nav-right">
-                        <!-- Display username when logged in -->
-                        <span class="text-gray-600">Hello, {{ session['name'] }}!</span>
-                        <a href="/user/logout" class="text-gray-600 hover:text-gray-800">Log out</a>
+                <a href="/searchhistory" >歷史紀錄</a>
+                <a href="/favorites" >我的最愛</a>
+                <!-- Separator for clarity -->
+                <div class="nav-separator"></div>
+                <!-- Container for greeting and logout -->
+                <div class="nav-right">
+                    <!-- Display username when logged in -->
+                    <span class="text-gray-600">Hello, {{ session['name'] }}!</span>
+                    <a href="/user/logout" class="text-gray-600 hover:text-gray-800">Log out</a>
                 {% else %}
-                    <!-- Display login and signup links when not logged in -->
+                <a href="/searchhistory" >歷史紀錄</a>
+                <a href="/favorites" >我的最愛</a>
+                <!-- Separator for clarity -->
+                <div class="nav-separator"></div> 
+                <!-- Display login and signup links when not logged in -->
+                <div class="nav-right"></div>
                     <a href="/user/login" class="text-gray-600 hover:text-gray-800">Log in</a>
                     <a href="/user/signup" class="text-gray-600 hover:text-gray-800">Sign up</a>
                 {% endif %}
