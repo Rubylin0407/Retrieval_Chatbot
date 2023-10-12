@@ -15,8 +15,8 @@ from utils import (
 import datetime
 from flask_jwt_extended import JWTManager
 import hashlib
-from database import (get_db_connection, insert_data_into_mongodb, close_mongodb_connection, user_exists, create_user, get_qa_history_from_mongodb,
-    insert_fav, delete_fav)
+from database import (get_db_connection, close_mongodb_connection, user_exists, create_user, get_qa_history_from_mongodb,
+    insert_fav, delete_fav, get_favorites_from_mongodb)
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -59,8 +59,8 @@ def messeage_prepare(system_info, prompt_info):
     
 def predict(user_input, chatbot):
     # Your prediction logic here
-    system_info = "你是聊天機器人 Retrieval Bot, [檢索資料]是由 Ruby Lin 提供的。 參考[檢索資料]使用中文簡潔和專業的回覆顧客的[問題], 如果答案不在資料中, 請說 “對不起, 我所擁有的資料中沒有相關資訊, 請您換個問題或將問題描述得更詳細, 讓我能正確完整的回答您”\n\n"
-    docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=5)[0]
+    system_info = "你是聊天機器人 Retrieval Bot, [檢索資料]是由 Ruby Lin 提供的。 當[問題]包含價格時，搜尋$。參考[檢索資料]使用中文簡潔和專業的回覆顧客的[問題], 如果答案不在資料中, 請說 “對不起, 我所擁有的資料中沒有相關資訊, 請您換個問題或將問題描述得更詳細, 讓我能正確完整的回答您”\n\n"
+    docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=2)[0]
     knowledge = "\n".join([docs_and_scores[0].page_content for docs_and_scores in docs_and_scores_list])
     prompt_info =  "[檢索資料]\n{}\n[問題]\n{}".format(knowledge, user_input)
     chatbot.append(user_input)
@@ -81,6 +81,10 @@ def index():
 def chatbot():
     return render_template('chatbot.html')
 
+@app.route('/searchhistory', methods=['GET']) 
+def search_history():     
+    return render_template('searchhistory.html')
+
 @app.route('/api/get-qa-history')
 def get_qa_history():
     try:
@@ -89,6 +93,7 @@ def get_qa_history():
             user_data = get_qa_history_from_mongodb(email, QA_history_collection)
             # Check if user_data is not []
             if len(user_data) !=0:
+                print(user_data)
                 return jsonify(user_data)
             else:
                 return jsonify([])  # Return an empty array if user_data is None
@@ -101,23 +106,24 @@ def get_qa_history():
 @app.route('/api/get-user-favorites')
 def get_fav():
     try:
-        email = session.get('email')
-        fav_collection = get_db_connection(user_db_name)["favorites"]
-        # Query MongoDB for all documents with the specified email
-        cursor = fav_collection.find({"email": email})
+        if session.get('logged_in'):
+            email = session.get('email')
+            fav_collection = get_db_connection(user_db_name)["favorites"]
+            # Query MongoDB for all documents with the specified email
+            cursor = fav_collection.find({"email": email})
 
-        # Initialize an empty list to store question and answer pairs
-        fav_lst = []
+            # Initialize an empty list to store question and answer pairs
+            fav_lst = []
 
-        # Iterate through the cursor and extract 'question' and 'answer' from each document
-        for doc in cursor:
-            if 'email' in doc:
-                fav_lst.append({
-                    'QA_pair_id': doc['QA_pair_id']
-                })
-
-        # Always return a valid JSON response
-        return jsonify(fav_lst)
+            # Iterate through the cursor and extract 'question' and 'answer' from each document
+            for doc in cursor:
+                id_str = str(doc['QA_pair_id'])
+                if 'email' in doc:
+                    fav_lst.append({
+                        'QA_pair_id': id_str
+                    })
+            # Always return a valid JSON response
+            return jsonify(fav_lst)
 
     except Exception as e:
         print(f"Failed to check data from {fav_collection.name}: {str(e)}")
@@ -144,21 +150,36 @@ def add_favorite():
 def remove_favorite():
     try:
         data = request.get_json()
-        print(f"data:{data}")
         QA_pair_id = data.get('QA_pair_id')
-        print(QA_pair_id)
 
         # The rest of your code to add the favorite goes here
         email = session.get('email')
         delete_fav(email, QA_pair_id)
         
         # Return a response indicating success if needed
-        return jsonify({'message': 'Favorite added successfully'})
+        return jsonify({'message': 'Favorite removed successfully'})
     except Exception as e:
         print(f"Failed to remove favorite: {str(e)}")
         # Handle errors and return an appropriate response
         return jsonify({'error': 'Failed to remove favorite'}), 500  # HTTP status code 500 for internal server error
 
+@app.route('/favorites', methods=['GET']) 
+def favorites():     
+    return render_template('favorites.html')
+
+@app.route('/api/get-favorites')
+def get_favorites():
+    try:
+        if session.get('logged_in'):
+            email = session.get('email')
+            fav_lst = get_favorites_from_mongodb(email)
+            # Always return a valid JSON response
+            return jsonify(fav_lst)
+
+    except Exception as e:
+        print(f"Failed to check data to favorites page: {str(e)}")
+        return jsonify([])  # Handle the error gracefully with an empty JSON array
+        
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
