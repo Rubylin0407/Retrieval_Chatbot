@@ -1,10 +1,9 @@
 import os
 import pymongo
 from dotenv import load_dotenv
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify
 import hashlib
-from bson import json_util
+from bson import ObjectId
 load_dotenv()
 
 # MongoDB connection details
@@ -36,6 +35,35 @@ def insert_unique_url_into_mongodb(urls, collection):
             print(f"Inserted URL: {url['url']} into {collection.name}")
         # else: not insert, because URL already exists in the collection
 
+def get_favorites_from_mongodb(email):
+    try:
+        # Establish connections
+        fav_collection = get_db_connection(user_db_name)["favorites"]
+        QA_pairs_collection = get_db_connection(user_db_name)["QA_history"]
+
+        # Query MongoDB for all documents with the specified email in favorites collection
+        cursor = fav_collection.find({"email": email})
+        
+        # Initialize an empty list to store question and answer pairs
+        qa_pairs_in_fav_collection = []
+
+        # Iterate through the cursor
+        for fav_doc in cursor:
+            # Find the corresponding QA pair using the QA_pair_id from the favorite document
+            qa_doc = QA_pairs_collection.find_one({"_id": fav_doc['QA_pair_id']})
+            if qa_doc:
+                qa_pairs_in_fav_collection.append({
+                    'QA_pair_id': str(fav_doc['QA_pair_id']),
+                    'question': qa_doc['question'],
+                    'answer': qa_doc['answer']
+                })
+        
+        return qa_pairs_in_fav_collection
+
+    except Exception as e:
+        print(f"Failed to check data from {fav_collection.name}: {str(e)}")
+        return None
+
 def get_qa_history_from_mongodb(email, collection):
     try:
         # Query MongoDB for all documents with the specified email
@@ -46,15 +74,13 @@ def get_qa_history_from_mongodb(email, collection):
         if cursor:
             # Iterate through the cursor and extract 'question' and 'answer' from each document
             for doc in cursor:
-                # print(doc)
                 if 'question' in doc and 'answer' in doc:
-                    doc['_id'] = json_util.dumps(doc['_id'])
+                    id_str = str(doc['_id'])
                     qa_pairs.append({
-                        '_id': doc['_id'],
+                        'id_str': id_str,
                         'question': doc['question'],
                         'answer': doc['answer']
                     })
-
         return qa_pairs
     except Exception as e:
         print(f"Failed to check data from {collection.name}: {str(e)}")
@@ -66,7 +92,7 @@ def insert_fav(email, QA_pair_id):
         with client.start_session() as session:
             fav_data = {
                 "email": email,
-                "QA_pair_id": QA_pair_id,
+                "QA_pair_id": ObjectId(QA_pair_id),
             }
             fav_collection.insert_one(fav_data) 
             print(f"Successfully inserted favorite data into {fav_collection.name}")
@@ -79,12 +105,12 @@ def delete_fav(email, QA_pair_id):
         with client.start_session() as session:
             fav_data = {
                 "email": email,
-                "QA_pair_id": QA_pair_id,
+                "QA_pair_id": ObjectId(QA_pair_id),
             }
             fav_collection.delete_one(fav_data) 
-            print(f"Successfully inserted favorite data into {fav_collection.name}")
+            print(f"Successfully deleted favorite data from {fav_collection.name}")
     except Exception as e:
-        print(f"Failed to insert favorite data into {fav_collection.name}: {str(e)}")
+        print(f"Failed to deleted favorite data from {fav_collection.name}: {str(e)}")
 
 # check if user already exist in database
 def user_exists(email, collection):
