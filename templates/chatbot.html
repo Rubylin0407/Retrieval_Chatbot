@@ -31,7 +31,8 @@
         }
 
         .message {
-            margin: 20px;
+            margin: 8px 0;
+            padding: 0;
         }
     
         .usermessagediv {
@@ -53,7 +54,7 @@
             justify-content: flex-start;
             flex-wrap: wrap;
             margin-right: 20%;
-            white-space: pre-line;
+            /* white-space: pre-line; */
         }
     
         .appmessage {
@@ -157,6 +158,8 @@
             let sendbtn = document.getElementById('sendbtn');
             let userinputarea = document.getElementById('userinput');
             let upperdiv = document.getElementById('upperid');
+            sendbtn.disabled = true;
+            userinputarea.disabled = true;
 
             upperdiv.innerHTML = upperdiv.innerHTML + `<div class="message">
                 <div class="usermessagediv">
@@ -205,23 +208,29 @@
 
                 if (json.response) {
                     let message = json.message;
-                    message = message.toString();
+                    message = message.toString().replace(/\n/g, '<br>');
+                    let parts = message.split('<br>');
+                    let index = 0;
+                    let partIndex = 0;
 
                     upperdiv.innerHTML = upperdiv.innerHTML + `<div class="message">
                         <div class="appmessagediv">
-                            <div class="appmessage" id="temp">
-
-                            </div>
+                            <div class="appmessage" id="temp"></div>
                         </div>
                     </div>`;
+
                     let temp = document.getElementById('temp');
-                    let index = 0;
 
                     function displayNextLetter() {
                         scrollToBottom();
-                        if (index < message.length) {
-                            temp.innerHTML = temp.innerHTML + message[index];
+                        if (index < parts[partIndex].length) {
+                            temp.innerHTML = temp.innerHTML + parts[partIndex][index];
                             index++;
+                            setTimeout(displayNextLetter, 30);
+                        } else if (partIndex < parts.length - 1) {
+                            temp.innerHTML = temp.innerHTML + '<br>';
+                            index = 0;
+                            partIndex++;
                             setTimeout(displayNextLetter, 30);
                         } else {
                             temp.removeAttribute('id');
@@ -229,6 +238,7 @@
                             userinputarea.disabled = false;
                         }
                     }
+
                     displayNextLetter();
                     scrollToBottom();
                 } else {
