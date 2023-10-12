@@ -16,6 +16,7 @@
         }
 
         .box {
+            position: relative;
             width: min(95%, 800px);
             height: 100vh;
             margin-top: 85px;
@@ -26,6 +27,7 @@
             bottom: 0;
             background-color: white;
             width: min(95%, 800px);
+            margin-bottom: 20px; 
         }
 
         .message {
@@ -62,7 +64,7 @@
         }
 
         .upper {
-            max-height: 100%;
+            max-height: calc(100% - 30px);
             padding-top: 40px;
             padding-bottom: 170px;
             overflow: auto;
@@ -76,13 +78,6 @@
             opacity: 0.6;
         }
 
-        .downwarning {
-            display: flex;
-            justify-content: center;
-            margin-top: 5px;
-            font-size: 90%;
-            color: gray;
-        }
         nav {
             position: fixed;
             width: 100%;
@@ -107,11 +102,7 @@
 
     <div class="container">
         <div class="box">
-            <div class="upper" id="upperid">
-                <span class="downwarning"></span>
-                
-
-            </div>
+            <div class="upper" id="upperid"></div>
 
             <div class="bottom">
                 <form id="userinputform" action="/chat" method="POST">
@@ -135,7 +126,6 @@
                     </div>
                 </form>
               
-                <span class="downwarning"></span>
             </div>
         </div>
     </div>
@@ -178,6 +168,18 @@
             sendbtn.disabled = true;
             userinputarea.disabled = true;
             scrollToBottom();
+
+            // 顯示"資料檢索中，請稍候..."
+            const loadingMessage = document.createElement('div');
+            loadingMessage.classList.add('message');
+            loadingMessage.innerHTML = `<div class="appmessagediv">
+                <div class="appmessage">
+                    資料檢索中，請稍候...
+                </div>
+            </div>`;
+            upperdiv.appendChild(loadingMessage);
+            scrollToBottom();
+
             document.getElementById('userinput').value = "";
             document.getElementById('userinput').placeholder = "Wait . . .";
 
@@ -195,6 +197,9 @@
                 }
 
                 const json = await response.json();
+
+                // Remove loading message here
+                loadingMessage.remove();
 
                 document.getElementById('userinput').placeholder = "由此輸入您的問題";
 
@@ -243,7 +248,8 @@
                 scrollToBottom();
             } catch (error) {
                 console.error(error);
-                // Handle the error gracefully here, you can display an error message to the user.
+                // Remove loading message
+                loadingMessage.remove();
             }
         };
     </script>
