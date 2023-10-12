@@ -189,7 +189,7 @@ def chat():
         # Get the chatbot response
         response = predict(user_input, chatbot)
         print(f"predict_response:{response}")
-        if session['logged_in'] == True:
+        if session.get('logged_in', False) == True:
             QA_pair = {
                     "email": session['email'],
                     "question": user_input,
