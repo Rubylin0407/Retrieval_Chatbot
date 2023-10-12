@@ -11,6 +11,14 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+P6i1EnyFp5Fm8afLRSc5AI5j6b0Piv5S9ezcLw4Pb3UrRY" crossorigin="anonymous">
     <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;  /* Ensures that the page doesn't scroll */
+            height: 100%;
+            font-family: 'Arial', sans-serif; /* Ensuring a clear font is used */
+        }
+
         body {
             font-family: 'Arial', sans-serif; /* Ensuring a clear font is used */
         }
@@ -45,7 +53,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
             overflow: hidden;
         }
-    
         .bottom {
             position: fixed;
             bottom: 0;
@@ -67,14 +74,6 @@
     
         #sendbtn:disabled {
             opacity: 0.6;
-        }
-    
-        .downwarning {
-            display: flex;
-            justify-content: center;
-            margin-top: 5px;
-            font-size: 90%;
-            color: gray;
         }
     
         nav {
@@ -162,25 +161,33 @@
     <div class="container">
         <div class="box">
             <div id="chatbot-container"></div>
-
         </div>
     </div>
 
-    <script>   
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
-        // Function to create and embed the chatbot iframe
-        function embedChatbot() {
-            const chatbotContainer = document.getElementById('chatbot-container');
-            const iframe = document.createElement('iframe');
-            iframe.src = '/chatbot'; // URL of the chatbot.html page
-            iframe.frameBorder = 0;
-            iframe.width = '100%';
-            iframe.height = '700px'; // Set the desired height
-            chatbotContainer.appendChild(iframe);
-        }
-
-        // Call the function to embed the chatbot when the page loads
-        embedChatbot();
-    });
+            // Function to create and embed the chatbot iframe
+            function embedChatbot() {
+                const chatbotContainer = document.getElementById('chatbot-container');
+                const iframe = document.createElement('iframe');
+                
+                // Calculate the available space for the iframe, considering the container's offset
+                let availableSpace = window.innerHeight - chatbotContainer.getBoundingClientRect().top;
+                
+                // Set the iframe height to the available space
+                let iframeHeight = availableSpace;  // Use all available space for the iframe
+                
+                iframe.src = '/chatbot'; // URL of the chatbot.html page
+                iframe.frameBorder = 0;
+                iframe.width = '100%';
+                iframe.height = iframeHeight + 'px';  // Dynamically set the height
+                
+                chatbotContainer.appendChild(iframe);
+            }
+            
+            // Call the function to embed the chatbot when the page loads
+            embedChatbot();
+        });
     </script>
+    </body>    
 </body>
