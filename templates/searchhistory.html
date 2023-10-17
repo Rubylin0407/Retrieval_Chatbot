@@ -176,8 +176,10 @@
             border-bottom: none;
         }
 
-        #QA-history-table th:nth-child(3),
-        #QA-history-table td:nth-child(3) {
+        #QA-history-table th:nth-child(1), #QA-history-table td:nth-child(1) {
+            width: 20%;
+        }
+        #QA-history-table th:nth-child(3), #QA-history-table td:nth-child(3) {
             width: 15%; 
         }
 
@@ -186,6 +188,18 @@
             vertical-align: middle;  /* For vertical centering */
         }
 
+        .container a {
+            color: #02448a;
+            text-decoration: underline;
+        }
+        .container a:hover {
+            color: rgb(105, 162, 247);
+            text-decoration: none;
+        }
+
+        td {
+            white-space: pre-line; /* This CSS property will respect newline characters and whitespace in content */
+        }
         </style>
     </head>
 
@@ -256,19 +270,26 @@
                 // Loop through the user_data and create table rows for each question-answer pair
                 user_data.forEach(entry => {
                     const question = entry.question;
-                    const answers = entry.answer.join(', ');
+                    const rawAnswer = entry.answer;
+
+                    // Parse rawAnswer to transform URLs into clickable links
+                    const linkedAnswer = rawAnswer.replace(
+                        /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g,
+                        '<a href="$2" target="_blank">$1</a>'
+                    );
+
                     const QA_pair_id = entry.id_str;
-    
+
                     // Create a new table row
                     const row = table.insertRow();
-    
+
                     // Create table cells for question and answers
                     const questionCell = row.insertCell(0);
                     const answerCell = row.insertCell(1);
-    
+
                     // Populate the table cells with question and answers
                     questionCell.innerText = `${question}`;
-                    answerCell.innerText = `${answers}`;
+                    answerCell.innerHTML = linkedAnswer; // Use innerHTML here because we're inserting HTML content
     
                     // Create a button cell and button element
                     const buttonCell = row.insertCell(2);
