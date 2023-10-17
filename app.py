@@ -21,7 +21,7 @@ load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 model_kwargs = {'device': 'cpu'}
-docs = read_and_process_knowledge_to_langchain_docs("data/knowledge.txt", separator = '\n', chunk_size=1028)
+docs = read_and_process_knowledge_to_langchain_docs("data/knowledge.txt", separator = '\n', chunk_size=1)
 embedding_function = initial_langchain_embeddings("moka-ai/m3e-base", model_kwargs, False)
 vectordb = initial_or_read_langchain_database_faiss(docs, embedding_function, "vectordb/vectordbPrivate", False) # not renew vector database
 s2t = opencc.OpenCC('s2t.json')
@@ -50,28 +50,33 @@ def postprocess(self, y):
         )
     return y
 
-def messeage_prepare(system_info, prompt_info):
-        message = [
-            {"role": "system", "content": system_info},
-            {"role": "user", "content": prompt_info}
-            ]
-        return message
+def messeage_prepare(system_info, user_input, history=[]):
+    message = [{"role": "system", "content": system_info}]
+    if len(history) > 0:
+        for old_question, old_answer in history:
+            message.append({"role": "user", "content": old_question})
+            message.append({"role": "assistant", "content": old_answer})
+
+    message.append({"role": "user", "content": user_input})
+    return message
     
-def predict(user_input, chatbot):
+def predict(user_input, history, system_info):
     # Your prediction logic here
-    system_info = "你是聊天機器人 Retrieval Bot, [檢索資料]是由 Ruby Lin 提供的。 當[問題]包含價格時，搜尋$。參考[檢索資料]使用中文簡潔和專業的回覆顧客的[問題], 如果答案不在資料中, 請說 “對不起, 我所擁有的資料中沒有相關資訊, 請您換個問題或將問題描述得更詳細, 讓我能正確完整的回答您”\n\n"
-    docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=2)[0]
-    knowledge = "\n".join([docs_and_scores[0].page_content for docs_and_scores in docs_and_scores_list])
-    prompt_info =  "[檢索資料]\n{}\n[問題]\n{}".format(knowledge, user_input)
-    chatbot.append(user_input)
+    if len(history) == 0:
+        docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=4)[0]
+        knowledge = "\n".join([docs_and_scores[0].page_content for docs_and_scores in docs_and_scores_list])
+        system_info += "[檢索資料]\n{}\n".format(knowledge)
+        print(f"knowledge:{knowledge}")
+
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=messeage_prepare(system_info, prompt_info),
-        temperature = 0.1,
+        messages = messeage_prepare(system_info, user_input, history),
+        temperature = 0.01,
     )
-    print(f"response:{response}")
-    chatbot[-1] = (response["choices"][0]["message"]["content"])
-    return chatbot
+    print(f"history :{history}\nsystem_info:{system_info}")
+    response = s2t.convert(response["choices"][0]["message"]["content"])
+
+    return response, system_info
 
 @app.route('/')
 def index():
@@ -197,11 +202,13 @@ def get_favorites():
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
-        user_input = request.get_json().get('data')
-        chatbot = []  # Initialize an empty chatbot conversation
-
         # Get the chatbot response
-        response = predict(user_input, chatbot)
+        user_input = request.get_json().get('data')
+        history = request.get_json().get('qa_history')
+        system_info = request.get_json().get('system_info')
+        response, system_info = predict(user_input, history, system_info)
+        history.append((user_input, response))
+
         print(f"predict_response:{response}")
         if session.get('logged_in', False) == True:
             QA_pair = {
@@ -211,7 +218,10 @@ def chat():
                 }
             # insert user's question and chatbot's response into mongodb
             QA_history_collection.insert_one(QA_pair)
-        return jsonify({"response": True, "message": response})
+        
+        # yield the JSON string
+        return jsonify({"response": True, "message": response, "qa_history": history, "system_info":system_info})
+
     except Exception as e:
         print(e)
         error_message = f'Error: {str(e)}'

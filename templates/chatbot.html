@@ -31,7 +31,7 @@
         }
 
         .message {
-            margin: 8px 0;
+            margin: 0;
             padding: 0;
         }
     
@@ -151,13 +151,19 @@
                 formsubmitted();
             }
         });
-
+        if ( typeof qa_history === "undefined" && typeof system_info === "undefined" ) {
+                var qa_history = [];
+                var system_info="你是聊天機器人 Retrieval Bot, [檢索資料]是由 Ruby Lin 提供的。 參考[檢索資料]使用中文簡潔和專業的回覆顧客的問題, 網址使用[標題](網址)的方式提供。如果答案沒在[檢索資料]內就回答'對不起, 本次沒有檢索到相關資料, 請你換個方式詢問'\n\n";
+            }
+            
         // sending request to python server
         const formsubmitted = async () => {
             let userinput = document.getElementById('userinput').value;
             let sendbtn = document.getElementById('sendbtn');
             let userinputarea = document.getElementById('userinput');
             let upperdiv = document.getElementById('upperid');
+            
+
             sendbtn.disabled = true;
             userinputarea.disabled = true;
 
@@ -192,7 +198,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ data: userinput })
+                    body: JSON.stringify({ data: userinput, qa_history: qa_history, system_info: system_info })
                 });
 
                 if (!response.ok) {
@@ -212,6 +218,10 @@
                     let parts = message.split('<br>');
                     let index = 0;
                     let partIndex = 0;
+                    //
+                    qa_history = json.qa_history ;
+                    system_info = json.system_info ;
+                    //
 
                     upperdiv.innerHTML = upperdiv.innerHTML + `<div class="message">
                         <div class="appmessagediv">
