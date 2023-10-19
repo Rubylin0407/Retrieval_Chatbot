@@ -24,10 +24,11 @@
 
         .bottom {
             position: fixed;
-            bottom: 0;
+            bottom: 20px;
             background-color: white;
             width: min(95%, 800px);
             margin-bottom: 20px; 
+            z-index: 2;
         }
 
         .message {
@@ -40,6 +41,7 @@
             justify-content: flex-end;
             flex-wrap: wrap;
             margin-left: 20%;
+            margin-bottom: 1rem;
         }
     
         .usermessage {
@@ -54,7 +56,7 @@
             justify-content: flex-start;
             flex-wrap: wrap;
             margin-right: 20%;
-            /* white-space: pre-line; */
+            margin-bottom: 1rem;
         }
     
         .appmessage {
@@ -65,10 +67,13 @@
         }
 
         .appmessage a {
-            color: rgb(105, 162, 247);
+            color: #02448a;
             text-decoration: underline;
         }
-        
+        .appmessage a:hover {
+            color: rgb(105, 162, 247);
+            text-decoration: none;
+        }        
         .upper {
             max-height: calc(100% - 30px);
             padding-top: 40px;
@@ -89,7 +94,7 @@
             width: 100%;
             padding: 3px;
             box-shadow: 1px 1px 5px #80808057;
-            /* z-index: 2; */
+            z-index: 99;
         }
     </style>
 </head>
@@ -245,23 +250,6 @@
 
                     let temp = document.getElementById('temp');
 
-                    // function displayNextLetter() {
-                    //     scrollToBottom();
-                    //     if (index < parts[partIndex].length) {
-                    //         temp.innerHTML = temp.innerHTML + parts[partIndex][index];
-                    //         index++;
-                    //         setTimeout(displayNextLetter, 30);
-                    //     } else if (partIndex < parts.length - 1) {
-                    //         temp.innerHTML = temp.innerHTML + '<br>';
-                    //         index = 0;
-                    //         partIndex++;
-                    //         setTimeout(displayNextLetter, 30);
-                    //     } else {
-                    //         temp.removeAttribute('id');
-                    //         sendbtn.disabled = false;
-                    //         userinputarea.disabled = false;
-                    //     }
-                    // }
                     function displayNextLetter() {
                         scrollToBottom();
                         if (index < parts[partIndex].length) {
