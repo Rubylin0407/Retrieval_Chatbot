@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from flask import jsonify
 import hashlib
 from bson import ObjectId
+from datetime import datetime
+import pytz
 load_dotenv()
 
 # MongoDB connection details
@@ -11,6 +13,9 @@ mongo_url = os.getenv("MONGODB_URL")
 client = pymongo.MongoClient(mongo_url)
 
 user_db_name = os.getenv("USER_DB_NAME")
+
+# Define the UTC+8 timezone
+tz_utc_8 = pytz.timezone('Asia/Taipei')
 
 def get_db_connection(database_name):
     # Connect to MongoDB
@@ -92,7 +97,7 @@ def insert_fav(email, QA_pair_id):
         with client.start_session() as session:
             fav_data = {
                 "email": email,
-                "QA_pair_id": ObjectId(QA_pair_id),
+                "QA_pair_id": ObjectId(QA_pair_id)
             }
             fav_collection.insert_one(fav_data) 
             print(f"Successfully inserted favorite data into {fav_collection.name}")
