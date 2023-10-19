@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅行團行程小幫手</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+P6i1EnyFp5Fm8afLRSc5AI5j6b0Piv5S9ezcLw4Pb3UrRY" crossorigin="anonymous">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;  /* Ensures that the page doesn't scroll */
+            height: 100%;
+            font-family: 'Arial', sans-serif; /* Ensuring a clear font is used */
+        }
+
+        body {
+            font-family: 'Arial', sans-serif; /* Ensuring a clear font is used */
+        }
+    
+        .bg-image::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://images.unsplash.com/photo-1433838552652-f9a46b332c40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8NHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            opacity: 0.6;
+            z-index: -1; /* Keeps the background behind the content */
+        }
+
+        .container {
+            min-width:100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    
+        .box {
+            width: min(95%, 800px);
+            height: 100vh;
+            margin-top: 85px;
+            background-color: #f7fafc; /* Light gray background for clarity */
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+            overflow: hidden;
+        }
+        .bottom {
+            position: fixed;
+            bottom: 0;
+            padding-bottom: 50%;
+            background-color: #ffffff;
+            width: min(95%, 800px);
+        }
+    
+        .upper {
+            max-height: 100%;
+            padding-top: 40px;
+            padding-bottom: 170px;
+            overflow: auto;
+        }
+    
+        .upper::-webkit-scrollbar {
+            width: 0 !important
+        }
+    
+        #sendbtn:disabled {
+            opacity: 0.6;
+        }
+    
+        nav {
+            position: fixed;
+            width: 100%;
+            padding: 3px;
+            background-color: #ffe5c1; /* soft, semi-transparent gray */
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2); /* subtle shadow for an elevated feel */
+            z-index: 2;
+            backdrop-filter: blur(2px); /* adds a slight blur to the content behind the nav for depth */
+        }
+
+        /* Additional CSS for clarity and spacing */
+        .nav-right {
+            margin-left: auto; /* Push the content to the right edge */
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Creates a gap between elements inside */
+        }
+
+        .nav-separator {
+            height: 20px;
+            border-left: 1px solid #ccc; /* A soft gray vertical separator */
+            margin: 0 15px; /* Spacing on both sides of the separator */
+        }
+
+        /* Update color for text to dark gray */
+        a, span {
+            color: #333333;
+        }
+
+        a:hover, a:focus {
+            color: #555555; /* A slightly lighter gray for hover and focus states */
+            text-decoration: none;
+        }
+
+
+        /* Hover effects for better user experience */
+        a:hover, a:focus {
+            color: #3182ce; /* Using the brighter blue */
+            text-decoration: none;
+        }
+
+        #chatbot-container iframe {
+            border-radius: 15px; /* Adjust the value as per your desired roundness */
+            overflow: hidden;    /* Ensures content inside respects the rounded corners */
+        }
+
+        .instruction-section {
+            background-color: #f7e0cb; /* 可根據需要調整背景顏色 */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            margin-right: 20px;
+            margin-left: 20px;
+            max-width: 35vw;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+        }
+
+        .custom-h2 {
+            color: #333333;
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .custom-p {
+            color: #555555;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .custom-ul {
+            list-style-type: disc; 
+            padding-left: 20px;   
+        }
+
+        .custom-li {
+            margin-bottom: 5px;   
+        }
+
+    </style>
+    
+</head>
+
+<body class="bg-image">
+
+    <nav>
+        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <a href="/" class="flex items-center">
+                <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">旅行團行程小幫手</span>
+            </a>
+
+            <!-- Add the buttons to the navigation bar -->
+            <div class="flex space-x-4">
+                {% if session['logged_in'] %}
+                <!-- Add History and Favorites buttons -->
+                <a href="/searchhistory" >歷史紀錄</a>
+                <a href="/favorites" >我的最愛</a>
+                <!-- Separator for clarity -->
+                <div class="nav-separator"></div>
+                <!-- Container for greeting and logout -->
+                <div class="nav-right">
+                    <!-- Display username when logged in -->
+                    <span class="text-gray-600">Hello, {{ session['name'] }}!</span>
+                    <a href="/user/logout" class="text-gray-600 hover:text-gray-800">Log out</a>
+                {% else %}
+                <a href="/searchhistory" >歷史紀錄</a>
+                <a href="/favorites" >我的最愛</a>
+                <!-- Separator for clarity -->
+                <div class="nav-separator"></div> 
+                <!-- Display login and signup links when not logged in -->
+                <div class="nav-right"></div>
+                    <a href="/user/login" class="text-gray-600 hover:text-gray-800">Log in</a>
+                    <a href="/user/signup" class="text-gray-600 hover:text-gray-800">Sign up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    
+    <div class="container">
+        <!-- 使用說明部分 -->
+        <div class="instruction-section">
+            <h2>Chatbot使用說明</h2>
+            <p>Chatbot的檢索資料包含日本、韓國、歐洲及泰國的旅行團資料。</p>
+            <p>您可依據Chatbot首次檢索到的資料繼續追問，若Chatbot首次未檢索到資料，請重新整理並嘗試換個問題詢問。</p>
+            <p>登入後詢問過的問題會記錄在「歷史紀錄」，在歷史紀錄中可將喜歡的問答加入「我的最愛」。</p>
+            <p>不知道要怎麼問嗎？可以試試看以下的問題：</p>
+            <ul>
+                <li>泡溫泉的行程</li>
+                <li>十二月出發的行程</li>
+                <li>價錢低於五萬的行程</li>
+            </ul>
+        </div>
+    
+        <!-- chatbot 部分 -->
+        <div class="box">
+            <div id="chatbot-container"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Function to create and embed the chatbot iframe
+            function embedChatbot() {
+                const chatbotContainer = document.getElementById('chatbot-container');
+                const iframe = document.createElement('iframe');
+                
+                // Calculate the available space for the iframe, considering the container's offset
+                let availableSpace = window.innerHeight - chatbotContainer.getBoundingClientRect().top;
+                
+                // Set the iframe height to the available space
+                let iframeHeight = availableSpace;  // Use all available space for the iframe
+                
+                iframe.src = '/chatbot'; // URL of the chatbot.html page
+                iframe.frameBorder = 0;
+                iframe.width = '100%';
+                iframe.height = iframeHeight + 'px';  // Dynamically set the height
+                
+                chatbotContainer.appendChild(iframe);
+            }
+            
+            // Call the function to embed the chatbot when the page loads
+            embedChatbot();
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            // 为 <h2> 添加样式
+            let h2Elements = document.querySelectorAll('h2');
+            h2Elements.forEach(function(h2) {
+                h2.classList.add('custom-h2');
+            });
+
+            // 为 <p> 添加样式
+            let pElements = document.querySelectorAll('p');
+            pElements.forEach(function(p) {
+                p.classList.add('custom-p');
+            });
+
+            // 为 <ul> 添加样式
+            let ulElements = document.querySelectorAll('ul');
+            ulElements.forEach(function(ul) {
+                ul.classList.add('custom-ul');
+            });
+
+            // 为 <li> 添加样式
+            let liElements = document.querySelectorAll('li');
+            liElements.forEach(function(li) {
+                li.classList.add('custom-li');
+            });
+        });
+    </script> 
+</body>
