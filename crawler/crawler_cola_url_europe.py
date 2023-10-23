@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import os
 from urllib.parse import urljoin
-from database import get_db_connection, insert_unique_url_into_mongodb, close_mongodb_connection
+from server.models.user_model import get_db_connection, insert_unique_url_into_mongodb, close_mongodb_connection
 import logging
 
 logging.basicConfig(level=logging.INFO)

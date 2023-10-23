@@ -108,42 +108,42 @@
         }
 
         /* Typography */
-        #fav-history-table {
+        #QA-history-table {
             font-size: 16px;
             border-radius: 15px;
             overflow: hidden;
         }
 
-        #fav-history-table caption {
+        #QA-history-table caption {
             font-size: 24px;
             margin-bottom: 16px;
             color: #4A4A4A;
         }
 
         /* Spacing */
-        #fav-history-table th,
-        #fav-history-table td {
+        #QA-history-table th,
+        #QA-history-table td {
             padding: 14px 20px;
             border: 1px solid #E2E8F0;
         }
 
-        #fav-history-table th:first-child {
+        #QA-history-table th:first-child {
             border-top-left-radius: 15px; 
         }
 
-        #fav-history-table th:last-child {
+        #QA-history-table th:last-child {
             border-top-right-radius: 15px; 
         }
 
-        #fav-history-table tr:last-child td:first-child {
+        #QA-history-table tr:last-child td:first-child {
             border-bottom-left-radius: 15px; 
         }
 
-        #fav-history-table tr:last-child td:last-child {
+        #QA-history-table tr:last-child td:last-child {
             border-bottom-right-radius: 15px; 
         }
         /* Colors */
-        #fav-history-table th {
+        #QA-history-table th {
             background-color: #fff06e86;  /* Change to a different color if desired */
             color: #2d3748;  /* Deep gray color */
             font-weight: 600;
@@ -151,41 +151,43 @@
             letter-spacing: 0.05em;
         }
 
-        #fav-history-table tbody tr:hover {
+        #QA-history-table tbody tr:hover {
             background-color: #E8F0FE; /* Light blue hover effect */
         }
 
-        #fav-history-table tr:nth-child(odd) {
+        #QA-history-table tr:nth-child(odd) {
             background-color: #fafce4bd; /* Alternate row color for better readability */
         }
 
         /* Borders & Shadows */
-        #fav-history-table {
+        #QA-history-table {
             border: 1px solid #E2E8F0;
             border-radius: 10px;
             overflow: hidden; /* This will ensure the table respects the border-radius of the container */
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
         }
 
-        #fav-history-table th, 
-        #fav-history-table td {
+        #QA-history-table th, 
+        #QA-history-table td {
             border-bottom: 1px solid #E2E8F0;
         }
 
-        #fav-history-table tr:last-child td {
+        #QA-history-table tr:last-child td {
             border-bottom: none;
         }
-        #fav-history-table th:nth-child(1), #fav-history-table td:nth-child(1) {
+
+        #QA-history-table th:nth-child(1), #QA-history-table td:nth-child(1) {
             width: 20%;
         }
-        #fav-history-table th:nth-child(3), #fav-history-table td:nth-child(3) {
+        #QA-history-table th:nth-child(3), #QA-history-table td:nth-child(3) {
             width: 15%; 
         }
 
-        #fav-history-table td:nth-child(3) {
+        #QA-history-table td:nth-child(3) {
             text-align: center;      /* For horizontal centering */
             vertical-align: middle;  /* For vertical centering */
         }
+
         .container a {
             color: #02448a;
             text-decoration: underline;
@@ -230,17 +232,17 @@
             </div>
         </div>
     </nav>
-    
+
     <div class="container">
         <div class="box">
-            <!-- 我的最愛 table -->
-            <table id="fav-history-table">
-                <caption>我的最愛</caption>
+            <!-- 歷史紀錄 table -->
+            <table id="QA-history-table">
+                <caption>歷史提問紀錄</caption>
                 <thead>
                     <tr>
                         <th>提問</th>
                         <th>回答</th>
-                        <th>移除我的最愛</th>
+                        <th>加到我的最愛</th>
                     </tr>
                 </thead>
             </table>
@@ -256,11 +258,11 @@
         // Function to fetch QA-history data from MongoDB and display question-answer pairs in a table
         async function fetchQAHistory() {
             try {
-                const response = await fetch('/api/get-favorites');
+                const response = await fetch('/api/v1/get-qa-history');
                 const user_data = await response.json();
-                    
+    
                 // Get a reference to the table element in your HTML
-                const table = document.getElementById('fav-history-table');
+                const table = document.getElementById('QA-history-table');
     
                 // Fetch the user's favorite items
                 const favorites = await fetchUserFavorites(); // Implement this function
@@ -276,7 +278,7 @@
                         '<a href="$2" target="_blank">$1</a>'
                     );
 
-                    const QA_pair_id = entry.QA_pair_id;
+                    const QA_pair_id = entry.id_str;
 
                     // Create a new table row
                     const row = table.insertRow();
@@ -288,7 +290,7 @@
                     // Populate the table cells with question and answers
                     questionCell.innerText = `${question}`;
                     answerCell.innerHTML = linkedAnswer; // Use innerHTML here because we're inserting HTML content
-
+    
                     // Create a button cell and button element
                     const buttonCell = row.insertCell(2);
                     const addButton = document.createElement('button');
@@ -303,8 +305,7 @@
     
                     addButton.addEventListener('click', () => {
                         // Handle the "Add to Favorites" action here
-                        // addToFavorites(QA_pair_id, addButton);
-                        RemoveFromFavorites(QA_pair_id, addButton);
+                        addToFavorites(QA_pair_id, addButton);
                     });
                     buttonCell.appendChild(addButton);
                 });
@@ -317,7 +318,7 @@
         // Function to fetch the user's favorite items
         async function fetchUserFavorites() {
             try {
-                const response = await fetch('/api/get-user-favorites');
+                const response = await fetch('/api/v1/get-user-favorites');
                 const favorites = await response.json();
                 return favorites.map(fav => fav.QA_pair_id);
             } catch (error) {
@@ -325,10 +326,9 @@
                 return [];
             }
         }
-
-        // Function to handle the "Remove from Favorites" action
-        function RemoveFromFavorites(QA_pair_id, button) {
-
+    
+        // Function to handle the "Add to Favorites" action
+        function addToFavorites(QA_pair_id, button) {
             // Check if the button already has a class "favorite"
             if (button.classList.contains('favorite')) {
                 // If it does, remove the class and change the heart to outline
@@ -343,12 +343,12 @@
                 // Implement your logic to add the item to favorites here
                 addFavorite(QA_pair_id);
             }
-        }    
-        
+        }
+    
         // Function to add an item to the user's favorites
         async function addFavorite(QA_pair_id) {
             try {
-                await fetch('/api/add-favorite', {
+                await fetch('/api/v1/add-favorite', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -364,7 +364,7 @@
         // Function to remove an item from the user's favorites
         async function removeFavorite(QA_pair_id) {
             try {
-                await fetch('/api/remove-favorite', {
+                await fetch('/api/v1/remove-favorite', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

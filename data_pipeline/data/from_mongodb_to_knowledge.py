@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-from database import get_db_connection, close_mongodb_connection
+from server.models.user_model import get_db_connection, close_mongodb_connection
 
 load_dotenv()
 
