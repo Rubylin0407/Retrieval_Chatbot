@@ -2,7 +2,7 @@ from flask import render_template,jsonify,request, session
 import openai, os
 from dotenv import load_dotenv
 import opencc
-from dotenv import load_dotenv
+import logging
 from data_pipeline.utils import (
     read_and_process_knowledge_to_langchain_docs,
     initial_langchain_embeddings,
@@ -39,14 +39,14 @@ def predict(user_input, history, system_info):
         docs_and_scores_list = vectordb.similarity_search_with_score([user_input], k=4)[0]
         knowledge = "\n".join([docs_and_scores[0].page_content for docs_and_scores in docs_and_scores_list])
         system_info += "[檢索資料]\n{}\n".format(knowledge)
-        print(f"knowledge:{knowledge}")
+        logging.info(f"knowledge:{knowledge}")
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-16k",
         messages = messeage_prepare(system_info, user_input, history),
         temperature = 0.01,
     )
-    print(f"history :{history}\nsystem_info:{system_info}")
+    logging.info(f"history :{history}\nsystem_info:{system_info}")
     response = s2t.convert(response["choices"][0]["message"]["content"])
 
     return response, system_info
@@ -65,7 +65,7 @@ def chat():
         response, system_info = predict(user_input, history, system_info)
         history.append((user_input, response))
 
-        print(f"predict_response:{response}")
+        logging.info(f"predict_response:{response}")
         if session.get('logged_in', False) == True:
             QA_pair = {
                     "email": session['email'],
@@ -75,10 +75,10 @@ def chat():
             # insert user's question and chatbot's response into mongodb
             QA_history_collection.insert_one(QA_pair)
         
-        # yield the JSON string
+        # return the JSON string
         return jsonify({"response": True, "message": response, "qa_history": history, "system_info":system_info})
 
     except Exception as e:
-        print(e)
+        logging.error(e)
         error_message = f'Error: {str(e)}'
         return jsonify({"message":error_message,"response":False})

@@ -1,14 +1,10 @@
 from flask import render_template,jsonify,request, session
-from flask_cors import CORS
 import os
 from dotenv import load_dotenv
-# import gradio as gr
-from dotenv import load_dotenv
+import logging
 
 from server import app
 from server.models.mongodb import MongoDBConnector
-# import datetime
-from flask_jwt_extended import JWTManager
 import hashlib
 from server.models.user_model import (close_mongodb_connection, user_exists, create_user, get_qa_history_from_mongodb,
     insert_fav, delete_fav, get_favorites_from_mongodb)
@@ -29,7 +25,6 @@ def user_signup():
             data = request.form
 
             name, email, password = data.get('name'), data.get('email'), data.get('password')
-            print(name, email, password)
             
             if not all([name, email, password]):
                 return "Name, email, and password are required.", 400
@@ -41,7 +36,7 @@ def user_signup():
             create_user(name, email, password, provider, user_info_collection)   
             return render_template('login.html')
         except Exception as e:
-            print(f"Error when signing up: {str(e)}")
+            logging.error(f"Error when signing up: {str(e)}")
             return "An error occurred while signing up.", 500
 
 @app.route('/user/login', methods=['GET', 'POST'])
@@ -58,7 +53,6 @@ def user_sign_in():
                 return jsonify("Email and password are required."), 400
             # if user exist, return user_information, including user name, email and hashed password
             user_data = user_exists(email, user_info_collection)
-            # print(user_data)
             if provider == "native":
                 # Hash the provided password and compare it with the stored password
                 provided_password_hash = hashlib.sha256(password.encode()).hexdigest()
@@ -69,10 +63,10 @@ def user_sign_in():
                     session['logged_in'] = True
                     session['name'] = user_data["name"]
                     session['email'] = user_data["email"]
-                    print("Successfully logging in")
+                    logging.info(f"Successfully logging in: {session['email']}")
             return render_template('index.html')
         except Exception as e:
-            print(f"Error when logging in: {str(e)}")
+            logging.error(f"Error when logging in: {str(e)}")
             return "An error occurred while logging in.", 500
 
 @app.route('/user/logout')
@@ -88,7 +82,7 @@ def search_history():
         else:
             return render_template('login.html')
     except Exception as e:
-        print(f"Error when fetching search history page: {str(e)}")
+        logging.error(f"Error when fetching search history page: {str(e)}")
         return jsonify({"error": "Failed to fetch QA history"})
 
 @app.route('/api/v1/get-qa-history')
@@ -99,14 +93,14 @@ def get_qa_history():
             user_data = get_qa_history_from_mongodb(email, QA_history_collection)
             # Check if user_data is not []
             if len(user_data) !=0:
-                print(user_data)
+                logging.info(user_data)
                 return jsonify(user_data)
             else:
                 return jsonify([])  # Return an empty array if user_data is None
         else:
             return jsonify({"error": "User not logged in"})
     except Exception as e:
-        print(f"Failed to fetch data from QA_history_collection: {str(e)}")
+        logging.error(f"Failed to fetch data from QA_history_collection: {str(e)}")
         return jsonify({"error": "Failed to fetch QA history"})
 
 @app.route('/api/v1/get-user-favorites')
@@ -114,7 +108,6 @@ def get_fav():
     try:
         if session.get('logged_in', False) == True:
             email = session.get('email')
-            # fav_collection = get_db_connection(user_db_name)["favorites"]
             # Query MongoDB for all documents with the specified email
             cursor = fav_collection.find({"email": email})
 
@@ -132,7 +125,7 @@ def get_fav():
             return jsonify(fav_lst)
 
     except Exception as e:
-        print(f"Failed to check data from {fav_collection.name}: {str(e)}")
+        logging.error(f"Failed to check data from {fav_collection}: {str(e)}")
         return jsonify([])  # Handle the error gracefully with an empty JSON array
 
 @app.route('/api/v1/add-favorite', methods = ['POST'])
@@ -146,7 +139,7 @@ def add_favorite():
         # Return a response indicating success if needed
         return jsonify({'message': 'Favorite added successfully'})
     except Exception as e:
-        print(f"Failed to add favorite: {str(e)}")
+        logging.error(f"Failed to add favorite: {str(e)}")
         # Handle errors and return an appropriate response
         return jsonify({'error': 'Failed to add favorite'}), 500  # HTTP status code 500 for internal server error
 
@@ -163,7 +156,7 @@ def remove_favorite():
         # Return a response indicating success if needed
         return jsonify({'message': 'Favorite removed successfully'})
     except Exception as e:
-        print(f"Failed to remove favorite: {str(e)}")
+        logging.error(f"Failed to remove favorite: {str(e)}")
         # Handle errors and return an appropriate response
         return jsonify({'error': 'Failed to remove favorite'}), 500  # HTTP status code 500 for internal server error
 
@@ -175,7 +168,7 @@ def favorites():
         else:
             return render_template('login.html')
     except Exception as e:
-        print(f"Error when fetching search history page: {str(e)}")
+        logging.error(f"Error when fetching search history page: {str(e)}")
         return jsonify({"error": "Failed to fetch QA history"})
 
 @app.route('/api/v1/get-favorites')
@@ -188,5 +181,5 @@ def get_favorites():
             return jsonify(fav_lst)
 
     except Exception as e:
-        print(f"Failed to check data to favorites page: {str(e)}")
+        logging.error(f"Failed to check data to favorites page: {str(e)}")
         return jsonify([])  # Handle the error gracefully with an empty JSON array

@@ -1,11 +1,7 @@
-import os
-# import pymongo
 from dotenv import load_dotenv
-# from flask import jsonify
 import hashlib
 from bson import ObjectId
-# from datetime import datetime
-# from server.models.mongodb import MongoDBConnector
+import logging
 import pytz
 load_dotenv()
 
@@ -33,7 +29,7 @@ def get_favorites_from_mongodb(email, fav_collection, QA_history_collection):
         return qa_pairs_in_fav_collection
 
     except Exception as e:
-        print(f"Failed to check data from {fav_collection.name}: {str(e)}")
+        logging.error(f"Failed to check data from {fav_collection}: {str(e)}")
         return None
 
 def get_qa_history_from_mongodb(email, QA_history_collection):
@@ -55,7 +51,7 @@ def get_qa_history_from_mongodb(email, QA_history_collection):
                     })
         return qa_pairs
     except Exception as e:
-        print(f"Failed to check data from {QA_history_collection.name}: {str(e)}")
+        logging.error(f"Failed to check data from {QA_history_collection}: {str(e)}")
         return None  # Handle the error gracefully
 
 def insert_fav(email, QA_pair_id, fav_collection):
@@ -65,9 +61,9 @@ def insert_fav(email, QA_pair_id, fav_collection):
             "QA_pair_id": ObjectId(QA_pair_id)
         }
         fav_collection.insert_one(fav_data) 
-        print(f"Successfully inserted favorite data into {fav_collection.name}")
+        logging.info(f"Successfully inserted favorite data into {fav_collection}")
     except Exception as e:
-        print(f"Failed to insert favorite data into {fav_collection.name}: {str(e)}")
+        logging.error(f"Failed to insert favorite data into {fav_collection}: {str(e)}")
 
 def delete_fav(email, QA_pair_id, fav_collection):
     try:
@@ -76,9 +72,9 @@ def delete_fav(email, QA_pair_id, fav_collection):
             "QA_pair_id": ObjectId(QA_pair_id),
         }
         fav_collection.delete_one(fav_data) 
-        print(f"Successfully deleted favorite data from {fav_collection.name}")
+        logging.info(f"Successfully deleted favorite data from {fav_collection}")
     except Exception as e:
-        print(f"Failed to deleted favorite data from {fav_collection.name}: {str(e)}")
+        logging.error(f"Failed to deleted favorite data from {fav_collection}: {str(e)}")
 
 # check if user already exist in database
 def user_exists(email, user_info_collection):
@@ -87,7 +83,7 @@ def user_exists(email, user_info_collection):
         if user_data:
             return user_data
     except Exception as e:
-        print(f"Failed to check data from {user_info_collection.name}: {str(e)}")    
+        print(f"Failed to check data from {user_info_collection}: {str(e)}")    
 
 def create_user(name, email, password, provider, user_info_collection):
     try:
@@ -99,9 +95,9 @@ def create_user(name, email, password, provider, user_info_collection):
             "password": password_jwt
         }
         user_info_collection.insert_one(user_data) 
-        print(f"Successfully inserted data into {user_info_collection.name}")
+        logging.info(f"Successfully inserted data into {user_info_collection}")
     except Exception as e:
-        print(f"Failed to insert data into {user_info_collection.name}: {str(e)}")
+        logging.error(f"Failed to insert data into {user_info_collection}: {str(e)}")
 
 # Close the MongoDB connection
 def close_mongodb_connection(collection):
