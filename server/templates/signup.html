@@ -8,77 +8,8 @@
     <title>Log In</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
-    <style>
-        body {
-            position: relative;
-            min-height: 100vh;
-            background-image: url('https://images.unsplash.com/photo-1433838552652-f9a46b332c40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZEW8NHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center center;
-        }
-
-        h2 {
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .signup-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: rgba(247, 250, 252, 0.8); /* Adding slight transparency to the background color for a frosted look */
-        }
-
-        #signup-form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .form-group {
-            margin: 10px 30px 20px 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 4px;
-            margin-left: 16px;
-        }
-
-        .form-group-button {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        button[type="submit"] {
-            background-color: #3182ce;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #2c5282;
-        }
-
-        button[type="back"] {
-            background-color: #53595e;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-    </style>
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
 </head>
 
 <body>
@@ -106,35 +37,6 @@
             </div>
         </form>
     </div>
-
-    <script>
-        async function submitForm(event) {
-            event.preventDefault();
-
-            const formData = new FormData(document.getElementById('signup-form'));
-
-            try {
-                const response = await fetch('/user/signup', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.status === 400) {
-                    const errorText = await response.text();
-                    alert(errorText);
-                } else if (response.status === 403) {
-                    alert('Email already exists.');
-                } else if (response.ok) {
-                    location.href = "/user/login";
-                } else {
-                    alert('An error occurred. Please try again.');
-                }
-            } catch (error) {
-                console.error('There was an error submitting the form:', error);
-                alert('An error occurred. Please try again.');
-            }
-        }
-    </script>
 </body>
 
 </html>

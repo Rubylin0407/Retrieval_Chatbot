@@ -1,0 +1,187 @@
+body {
+    font-family: 'Arial', sans-serif; /* Ensuring a clear font is used */
+    background-color: #fffce8;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-width:100%;
+}
+
+.box {
+    width: min(95%, 1100px);
+    margin: 85px auto 0;
+    background-color: #f7fafc; /* Light gray background for clarity */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+    padding: 20px;
+    overflow: hidden;
+}
+
+
+.bottom {
+    position: fixed;
+    bottom: 0;
+    padding-bottom: 5%;
+    background-color: #ffffff;
+    width: min(95%, 800px);
+}
+
+.upper {
+    max-height: 100%;
+    padding-top: 40px;
+    padding-bottom: 170px;
+    overflow: auto;
+}
+
+.upper::-webkit-scrollbar {
+    width: 0 !important
+}
+
+#sendbtn:disabled {
+    opacity: 0.6;
+}
+
+.downwarning {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    font-size: 90%;
+    color: gray;
+}
+
+nav {
+    position: fixed;
+    width: 100%;
+    padding: 3px;
+    background-color: #ffe5c1; /* soft, semi-transparent gray */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2); /* subtle shadow for an elevated feel */
+    z-index: 2;
+    backdrop-filter: blur(2px); /* adds a slight blur to the content behind the nav for depth */
+}
+
+/* Additional CSS for clarity and spacing */
+.nav-right {
+    margin-left: auto; /* Push the content to the right edge */
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Creates a gap between elements inside */
+}
+
+.nav-separator {
+    height: 20px;
+    border-left: 1px solid #ccc; /* A soft gray vertical separator */
+    margin: 0 15px; /* Spacing on both sides of the separator */
+}
+
+/* Update color for text to dark gray */
+a, span {
+    color: #333333;
+}
+
+a:hover, a:focus {
+    color: #555555; /* A slightly lighter gray for hover and focus states */
+    text-decoration: none;
+}
+
+
+/* Hover effects for better user experience */
+a:hover, a:focus {
+    color: #3182ce; /* Using the brighter blue */
+    text-decoration: none;
+}
+
+/* Typography */
+#fav-history-table {
+    font-size: 16px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+#fav-history-table caption {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: #4A4A4A;
+}
+
+/* Spacing */
+#fav-history-table th,
+#fav-history-table td {
+    padding: 14px 20px;
+    border: 1px solid #E2E8F0;
+}
+
+#fav-history-table th:first-child {
+    border-top-left-radius: 15px; 
+}
+
+#fav-history-table th:last-child {
+    border-top-right-radius: 15px; 
+}
+
+#fav-history-table tr:last-child td:first-child {
+    border-bottom-left-radius: 15px; 
+}
+
+#fav-history-table tr:last-child td:last-child {
+    border-bottom-right-radius: 15px; 
+}
+/* Colors */
+#fav-history-table th {
+    background-color: #fff06e86;  /* Change to a different color if desired */
+    color: #2d3748;  /* Deep gray color */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+#fav-history-table tbody tr:hover {
+    background-color: #E8F0FE; /* Light blue hover effect */
+}
+
+#fav-history-table tr:nth-child(odd) {
+    background-color: #fafce4bd; /* Alternate row color for better readability */
+}
+
+/* Borders & Shadows */
+#fav-history-table {
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    overflow: hidden; /* This will ensure the table respects the border-radius of the container */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+#fav-history-table th, 
+#fav-history-table td {
+    border-bottom: 1px solid #E2E8F0;
+}
+
+#fav-history-table tr:last-child td {
+    border-bottom: none;
+}
+#fav-history-table th:nth-child(1), #fav-history-table td:nth-child(1) {
+    width: 20%;
+}
+#fav-history-table th:nth-child(3), #fav-history-table td:nth-child(3) {
+    width: 15%; 
+}
+
+#fav-history-table td:nth-child(3) {
+    text-align: center;      /* For horizontal centering */
+    vertical-align: middle;  /* For vertical centering */
+}
+.container a {
+    color: #02448a;
+    text-decoration: underline;
+}
+.container a:hover {
+    color: rgb(105, 162, 247);
+    text-decoration: none;
+}
+
+td {
+    white-space: pre-line; /* This CSS property will respect newline characters and whitespace in content */
+}

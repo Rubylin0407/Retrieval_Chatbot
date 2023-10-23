@@ -1,0 +1,144 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;  /* Ensures that the page doesn't scroll */
+    height: 100%;
+    font-family: 'Arial', sans-serif; /* Ensuring a clear font is used */
+}
+
+body {
+    font-family: 'Arial', sans-serif; /* Ensuring a clear font is used */
+}
+
+.bg-image::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('https://images.unsplash.com/photo-1433838552652-f9a46b332c40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8NHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    opacity: 0.6;
+    z-index: -1; /* Keeps the background behind the content */
+}
+
+.container {
+    min-width:100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.box {
+    width: min(95%, 800px);
+    height: 100vh;
+    margin-top: 85px;
+    background-color: #f7fafc; /* Light gray background for clarity */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+    overflow: hidden;
+}
+.bottom {
+    position: fixed;
+    bottom: 0;
+    padding-bottom: 50%;
+    background-color: #ffffff;
+    width: min(95%, 800px);
+}
+
+.upper {
+    max-height: 100%;
+    padding-top: 40px;
+    padding-bottom: 170px;
+    overflow: auto;
+}
+
+.upper::-webkit-scrollbar {
+    width: 0 !important
+}
+
+#sendbtn:disabled {
+    opacity: 0.6;
+}
+
+nav {
+    position: fixed;
+    width: 100%;
+    padding: 3px;
+    background-color: #ffe5c1; /* soft, semi-transparent gray */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2); /* subtle shadow for an elevated feel */
+    z-index: 2;
+    backdrop-filter: blur(2px); /* adds a slight blur to the content behind the nav for depth */
+}
+
+/* Additional CSS for clarity and spacing */
+.nav-right {
+    margin-left: auto; /* Push the content to the right edge */
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Creates a gap between elements inside */
+}
+
+.nav-separator {
+    height: 20px;
+    border-left: 1px solid #ccc; /* A soft gray vertical separator */
+    margin: 0 15px; /* Spacing on both sides of the separator */
+}
+
+/* Update color for text to dark gray */
+a, span {
+    color: #333333;
+}
+
+a:hover, a:focus {
+    color: #555555; /* A slightly lighter gray for hover and focus states */
+    text-decoration: none;
+}
+
+
+/* Hover effects for better user experience */
+a:hover, a:focus {
+    color: #3182ce; /* Using the brighter blue */
+    text-decoration: none;
+}
+
+#chatbot-container iframe {
+    border-radius: 15px; /* Adjust the value as per your desired roundness */
+    overflow: hidden;    /* Ensures content inside respects the rounded corners */
+}
+
+.instruction-section {
+    background-color: #f7e0cb; /* 可根據需要調整背景顏色 */
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    margin-left: 20px;
+    max-width: 35vw;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+}
+
+.custom-h2 {
+    color: #333333;
+    font-size: 24px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.custom-p {
+    color: #555555;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.custom-ul {
+    list-style-type: disc; 
+    padding-left: 20px;   
+}
+
+.custom-li {
+    margin-bottom: 5px;   
+}
