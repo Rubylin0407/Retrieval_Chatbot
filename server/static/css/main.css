@@ -106,8 +106,9 @@ a:hover, a:focus {
 }
 
 #chatbot-container iframe {
-    border-radius: 15px; /* Adjust the value as per your desired roundness */
-    overflow: hidden;    /* Ensures content inside respects the rounded corners */
+    border-radius: 15px;
+    overflow: hidden;
+    height: calc(100vh - 85px);
 }
 
 .instruction-section {
