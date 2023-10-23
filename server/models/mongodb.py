@@ -1,6 +1,5 @@
 import os
 import pymongo
-# from pymongo import MongoClient
 from dotenv import load_dotenv
 import logging
 
@@ -29,3 +28,17 @@ class MongoDBConnector:
             self.collection.insert_one(document)
         except pymongo.errors.PyMongoError as e:
             logging.error(f"Failed to insert document: {e}")
+    
+    def find(self, query=None, **kwargs):
+        """
+        Retrieves documents from the collection based on a query.
+
+        :param query: A dictionary specifying the search criteria.
+        :param kwargs: Additional arguments to pass to the find method (e.g., sort, limit).
+        :return: A cursor to the results.
+        """
+        try:
+            return self.collection.find(query, **kwargs)
+        except pymongo.errors.PyMongoError as e:
+            logging.error(f"Failed to fetch documents: {e}")
+            return []
