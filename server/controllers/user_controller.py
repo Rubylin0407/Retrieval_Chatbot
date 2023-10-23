@@ -151,7 +151,7 @@ def remove_favorite():
 
         # The rest of your code to add the favorite goes here
         email = session.get('email')
-        delete_fav(email, QA_pair_id)
+        delete_fav(email, QA_pair_id, fav_collection)
         
         # Return a response indicating success if needed
         return jsonify({'message': 'Favorite removed successfully'})
