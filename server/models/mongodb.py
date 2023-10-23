@@ -42,3 +42,29 @@ class MongoDBConnector:
         except pymongo.errors.PyMongoError as e:
             logging.error(f"Failed to fetch documents: {e}")
             return []
+    def find_one(self, query=None, **kwargs):
+        """
+        Retrieves a single document from the collection based on a query.
+
+        :param query: A dictionary specifying the search criteria.
+        :param kwargs: Additional arguments to pass to the find_one method (e.g., projection).
+        :return: A single document or None.
+        """
+        try:
+            return self.collection.find_one(query, **kwargs)
+        except pymongo.errors.PyMongoError as e:
+            logging.error(f"Failed to fetch document: {e}")
+            return None
+
+    def delete_one(self, query):
+        """
+        Deletes a single document from the collection based on a query.
+
+        :param query: A dictionary specifying the search criteria for deletion.
+        :return: The result of the deletion operation (includes info like number of documents deleted).
+        """
+        try:
+            return self.collection.delete_one(query)
+        except pymongo.errors.PyMongoError as e:
+            logging.error(f"Failed to delete document: {e}")
+            return None
