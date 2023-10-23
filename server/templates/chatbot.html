@@ -8,7 +8,6 @@
     <title>Chatbot</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
-    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
 </head>
 
@@ -35,7 +34,7 @@
 
                         <textarea id="userinput" rows="1"
                             class="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder="Your message..." required></textarea>
+                            placeholder="由此輸入您的問題..." required></textarea>
                         <button type="submit"
                             class="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
                             id="sendbtn">
@@ -54,5 +53,5 @@
         </div>
     </div>
 </body>
-
+<script defer src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 </html>

@@ -8,10 +8,7 @@
     <title>旅行團行程小幫手</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
-    <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+P6i1EnyFp5Fm8afLRSc5AI5j6b0Piv5S9ezcLw4Pb3UrRY" crossorigin="anonymous"> -->
 </head>
 
 <body class="bg-image">
@@ -38,6 +35,7 @@
                 {% else %}
                 <a href="/searchhistory" >歷史紀錄</a>
                 <a href="/favorites" >我的最愛</a>
+                </div> 
                 <!-- Separator for clarity -->
                 <div class="nav-separator"></div> 
                 <!-- Display login and signup links when not logged in -->
@@ -51,7 +49,7 @@
     
     
     <div class="container">
-        <!-- 使用說明部分 -->
+        <!-- Chatbot Guide -->
         <div class="instruction-section">
             <h2>Chatbot使用說明</h2>
             <p>Chatbot的檢索資料包含日本、韓國、歐洲及泰國的旅行團資料。</p>
@@ -65,9 +63,10 @@
             </ul>
         </div>
     
-        <!-- chatbot 部分 -->
+        <!-- chatbot -->
         <div class="box">
             <div id="chatbot-container"></div>
         </div>
     </div>
 </body>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
