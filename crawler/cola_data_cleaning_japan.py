@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 from chromedriver_py import binary_path 
 import os
-from database import get_db_connection, insert_data_into_mongodb, close_mongodb_connection
+from server.models.user_model import get_db_connection, insert_data_into_mongodb, close_mongodb_connection
 from datetime import datetime
 import logging
 import pytz
