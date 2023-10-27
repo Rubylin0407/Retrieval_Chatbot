@@ -7,7 +7,7 @@ import openai
 import mdtex2html
 import gradio as gr
 from dotenv import load_dotenv
-from utils import (
+from data_pipeline.utils import (
     read_and_process_knowledge_to_langchain_docs,
     initial_langchain_embeddings,
     initial_or_read_langchain_database_faiss,

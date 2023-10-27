@@ -2,8 +2,8 @@ import os
 import openai
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.document_loaders import TextLoader
-from vectorstores import FAISS
-from embeddings import OpenAIEmbeddings, HuggingFaceEmbeddings
+from data_pipeline.vectorstores import FAISS
+from data_pipeline.embeddings import OpenAIEmbeddings, HuggingFaceEmbeddings
 
 def read_and_process_knowledge_to_langchain_docs(knowledge_file_path, separator = "\n",chunk_size=64, chunk_overlap=0):
     documents = TextLoader(knowledge_file_path).load()
