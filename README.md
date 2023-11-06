@@ -43,7 +43,7 @@
 
 
 ## Architecture
-![](https://github.com/Rubylin0407/Public_assets/blob/main/chatbot_architecture.drawio-8.png)
+![](https://github.com/Rubylin0407/Public_assets/blob/main/chatbot_architecture.png)
 
 
 ## Main Features
